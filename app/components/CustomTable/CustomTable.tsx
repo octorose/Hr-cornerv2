@@ -21,8 +21,9 @@ const TableHeader: React.FC<TableHeaderProps> = ({
   return <th className={classNames}>{header}</th>;
 };
 
-function CustomTable({ headres, data }: { headres: string[]; data: any }) {
+function CustomTable({ headres, data2 }: { headres: string[]; data2: any }) {
 
+//console.log(data2);
 
   return (
     <div className="w-full">
@@ -40,80 +41,21 @@ function CustomTable({ headres, data }: { headres: string[]; data: any }) {
           </tr>
         </thead>
         <tbody>
-          {data &&
-            data.map(
-              (
-                item: {
-                  data:
-                    | string
-                    | number
-                    | boolean
-                    | React.ReactElement<
-                        any,
-                        string | React.JSXElementConstructor<any>
-                      >
-                    | Iterable<React.ReactNode>
-                    | React.ReactPortal
-                    | React.PromiseLikeOfReactNode
-                    | null
-                    | undefined;
-                  time:
-                    | string
-                    | number
-                    | boolean
-                    | React.ReactElement<
-                        any,
-                        string | React.JSXElementConstructor<any>
-                      >
-                    | Iterable<React.ReactNode>
-                    | React.ReactPortal
-                    | React.PromiseLikeOfReactNode
-                    | null
-                    | undefined;
-                  reason:
-                    | string
-                    | number
-                    | boolean
-                    | React.ReactElement<
-                        any,
-                        string | React.JSXElementConstructor<any>
-                      >
-                    | Iterable<React.ReactNode>
-                    | React.ReactPortal
-                    | React.PromiseLikeOfReactNode
-                    | null
-                    | undefined;
-                  status:
-                    | string
-                    | number
-                    | boolean
-                    | React.ReactElement<
-                        any,
-                        string | React.JSXElementConstructor<any>
-                      >
-                    | Iterable<React.ReactNode>
-                    | React.PromiseLikeOfReactNode
-                    | null
-                    | undefined;
-                },
-                index: React.Key | null | undefined
-              ) => (
-                <tr className="p-2 text-center rounded-t-lg rounded-b-lg text-neutral-500 hover:border-ft-lt/30 cursor-pointer">
-                  {Object.values(item).map((value, index) => (
+          {data2 &&
+            data2.data.map((item: any, index: React.Key | null | undefined) => (
+              <tr className="p-2 text-center rounded-t-lg rounded-b-lg text-neutral-500 hover:border-ft-lt/30 cursor-pointer">
+                {Object.values(item).map((value, index) =>
+                  index < headres.length ? (
                     <td
                       key={index}
                       className="py-4 px-6 border-b border-neutral-200"
                     >
-                      {typeof value === "object" && React.isValidElement(value)
-                        ? // Check if the value is a React element, and render it if so
-                          value
-                        : // Otherwise, render the value as a string or number
-                          String(value)}
+                      {item[headres[index]]}
                     </td>
-                  ))}
-                </tr>
-              )
-            )}
+                  ) : null
+                )}
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
