@@ -1,19 +1,24 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
+
 interface Role {
     Role: string;
     Departement: string;
     Date_Creation: string;
 }
-let roles = mongoose.model<Role>("roles");
+
+let Roles: Model<Role>;
+
 try {
-    const RolesSchema = new mongoose.Schema<Role>({
-        Role: String,
-        Departement: String,
-        Date_Creation: String,
-    });
-    roles = mongoose.model<Role>("roles", RolesSchema);
+  const RolesSchema = new mongoose.Schema<Role>(
+    {
+    Role: String,
+    Departement: String,
+    Date_Creation: String
+},
+    { timestamps: { createdAt: "created_at" } }
+  );
+  Roles = mongoose.model<Role>("roles", RolesSchema);
+} catch (error) {
+  Roles = mongoose.model<Role>("roles");
 }
-catch (error) {
-    roles = mongoose.model<Role>("roles");
-}
-export default roles;
+export default Roles;

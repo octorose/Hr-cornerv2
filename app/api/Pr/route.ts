@@ -10,7 +10,7 @@ async function GET(req: NextRequest) {
     await connect();
     
     // Fetch data from the database
-    const prData = await pr.find({}, { Pr_Id: 1 }); // Only fetch Pr_Id field and exclude _id field
+    const prData = await pr.find({}); // Only fetch Pr_Id field and exclude _id field
 
     // Extract Pr_Ids from the fetched data
     const prIds = prData.map((item:any) => item["_doc"].Pr_Id);
