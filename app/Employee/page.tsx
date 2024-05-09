@@ -15,21 +15,23 @@ import {
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import CardLineChart from "@/components/ui/charts/CardLineChart";
 import CustomTable from "@/components/CustomTable/CustomTable";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashHeader from "@/components/Header/DashHeader";
 import { absenciese } from "@/data/Absencies";
 
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { Plus } from "lucide-react";
 import GlobalButton from "@/components/GlobalButton/globalButton";
 import useAlert from "@/Hooks/useAlert";
 import Wallettype from "@/components/GlobalModal/Wallettype";
 
-const Candidate = () => {
+const Candidate = ({searchParams}:any) => {
   const { alert, setAlert } = useAlert();
+  const [data, setData] = useState<any>();
   const [formstep, setFormStep] = useState(1);
+
   interface Candidate {
-    ID: number;
+    ID: string | null;
     Nom: string;
     Prenom: string;
     Date_naissance: string;
@@ -50,7 +52,7 @@ const Candidate = () => {
     AcceptedE3: string;
   }
   const [formdata, setFormdata] = useState<Candidate>({
-    ID: 0,
+    ID:null,
     Nom: "",
     Prenom: "",
     Date_naissance: "",
@@ -71,19 +73,7 @@ const Candidate = () => {
     AcceptedE3: "",
   });
 
-  const { data, error } = useSWR<Candidate[]>(
-    "/api/Candidates",
-    async (url: any) => {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-      const data = await response.json();
-      // setCandidate(data);
-      return data;
-    }
-  );
-  const {data:Prs, error:rolesError} = useSWR("/api/Pr", async (url: any) => {
+  const {data:Candidates, error} = useSWR("/api/Candidates", async (url: any) => {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error("Failed to fetch data");
@@ -96,13 +86,50 @@ const Candidate = () => {
   }
   );
 
+  const {data:Prs, error:rolesError} = useSWR("/api/Pr", async (url: any) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    const data = await response.json();
+    console.log(data);
+    
+    return data;
+  
+  }
+  );
+      const handleSearch = (e: any) => {
+      const search = e.target.value;
+      if (search === "") {
+        setCandidate(undefined);
+      }
+      const filtered = Object.values(Candidates).filter((item: any) => {
+        return item.Nom === search;
+      });
+
+      if (filtered.length > 0) {
+        setCandidate(filtered[0] as Candidate);
+        console.log(filtered[0] as Candidate);
+        
+      }
+    };
+  const SearchaCandidate = () => {
+    const search = Candidates?.filter((item:any) => item.Nom === searchParams);
+    if (search !== undefined) {
+      setCandidate(search[0]);
+    }
+  }
+
+
   const isValidPr = (value: string) => {
         const inputElement = document.getElementById("prInput"); 
 
     if (Prs.data.includes(Number(value))) {
       console.log("Valid PR");
-      inputElement.style.borderColor = "green"
-      return true;
+      if(inputElement !== null){
+        inputElement.style.borderColor = "green"
+        return true;
+      }
     } else {
       Toast.fire({
         icon:'warning',
@@ -113,12 +140,12 @@ const Candidate = () => {
     }
   };
   const [Candidate, setCandidate] = useState<Candidate>();
-  const handleSearch = (e: any) => {
-    const search = data?.filter((item) => item.Nom === e);
-    if (search !== undefined) {
-      setCandidate(search[0]);
-    }
-  };
+  // const handleSearch = (e: any) => {
+  //   const search = data?.filter((item) => item.Nom === e);
+  //   if (search !== undefined) {
+  //     setCandidate(search[0]);
+  //   }
+  // };
   const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -133,25 +160,23 @@ const Candidate = () => {
   const headres = ["Date", "Time", "Reason", "Status"];
   return (
     <main>
-      {Candidate ? (
+      {/* {Candidate ? (
         <div>
-          <DashHeader handleSearch={handleSearch} Candidate={Candidate} />
+          <DashHeader
+            handleSearch={() => {
+              console.log("test");
+            }}
+            Candidate={Candidate}
+          />
           <div className="grid gap-6 mt-4">
             <Card>
               <CardHeader className="flex items-center gap-4">
-                <Image
-                  src={Candidate?.pic}
-                  alt="Profile"
-                  width={80}
-                  height={80}
-                  className="rounded-full"
-                />
                 <div className="flex flex-col justify-center text-center">
                   <CardTitle className="text-base font-semibold">
-                    {/* {Candidate?.Name} */}
+                    {Candidate?.Name}
                   </CardTitle>
                   <CardDescription className="text-sm">
-                    {/* {Candidate?.Department} */}
+                    {Candidate?.Department}
                   </CardDescription>
                 </div>
                 <Button className="ml-auto" size="sm" variant="outline">
@@ -163,19 +188,19 @@ const Candidate = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h3 className="text-sm font-semibold">Candidate ID</h3>
-                      {/* <p className="text-sm">{Candidate.Id}</p> */}
+                      <p className="text-sm">{Candidate.Id}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold">Email</h3>
-                      {/* <p className="text-sm">{Candidate.Email}</p> */}
+                      <p className="text-sm">{Candidate.Email}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold">Phone</h3>
-                      {/* <p className="text-sm">{Candidate.Phone}</p> */}
+                      <p className="text-sm">{Candidate.Phone}</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold">Address</h3>
-                      <p className="text-sm">{Candidate.Address}</p>
+                      <p className="text-sm">{Candidate.Addresse}</p>
                     </div>
                   </div>
                 )}
@@ -203,16 +228,12 @@ const Candidate = () => {
             </div>
           </div>
         </div>
-      ) : (
-        <div>
-          <DashHeader handleSearch={handleSearch} Candidate={Candidate} />
-          <div className="flex flex-col items-center justify-center mt-10 h-1/2">
-            <h1 className="text-2xl font-semibold">Search for an Candidate</h1>
-            <p className="text-sm text-neutral-500">
-              Search for an Candidate to view their profile
-            </p>
-            <div>
-              <div className="flex flex-row items-center gap-4 mt-4">
+      ) : ( */}
+        <div className="">
+          <div className="flex flex-col  mt-10 h-1/2">
+           
+            <div className="">
+              <div className="flex  flex-row  gap-4 mt-4">
                 <CustomTable
                   headres={[
                     "Nom",
@@ -222,16 +243,19 @@ const Candidate = () => {
                     "Status",
                     "ApplicationSource",
                   ]}
-                  data2={data}
+
                 />
               </div>
             </div>
           </div>
         </div>
-      )}
+      
       <div style={{ position: "fixed", bottom: "20px", right: "20px" }}>
         <GlobalButton
           onClick={() =>
+            // setCurrentPage((prev) => {
+            //   return prev + 1;
+            // })
             setAlert((prev) => {
               return {
                 ...prev,
@@ -269,8 +293,9 @@ const Candidate = () => {
                 "Content-Type": "application/json",
               },
             });
-            // await addCandidat(alert.walletName, alert.walletAddress);
+            // mutate();
             setAlert((prev) => ({ ...prev, isLoading: false, isOpen: false }));
+            setFormStep(1);
           }
         }}
         onCancel={() => {
@@ -393,32 +418,29 @@ const Candidate = () => {
             </FormControl>
             <div className="flex gap-2">
               <input
-              id="prInput"
+                id="prInput"
                 type="number"
                 placeholder="PR"
                 max={6}
                 className="h-14 w-full p-2 border border-gray-400 rounded"
-                onChange={(e) =>{
-                  if(e.target.value.length >= 6 ){
-                    setFormdata({ ...formdata, Pr_ID: Number(e.target.value) })
-                            isValidPr(e.target.value);
+                onChange={(e) => {
+                  if (e.target.value.length >= 6) {
+                    setFormdata({ ...formdata, Pr_ID: Number(e.target.value) });
+                    isValidPr(e.target.value);
                   }
-                }
-                }
+                }}
               />
             </div>
             <input
               type="number"
               placeholder="Experience"
               className="h-12 p-2 border-gray-400 rounded"
-              onChange={(e) =>{
-  
-                  setFormdata({ ...formdata, Experience: Number(e.target.value) })
-          
-
-              }
-              }
-            
+              onChange={(e) => {
+                setFormdata({
+                  ...formdata,
+                  Experience: Number(e.target.value),
+                });
+              }}
             />
           </div>
         )}
