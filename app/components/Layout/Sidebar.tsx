@@ -16,34 +16,42 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import logo from "@/Images/LeoniLogo.png";
 
+// Postion Request icon an inline PR icon
+const PositioRequestIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-4 w-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+    />
+  </svg>
+);
+
 const Sidebar = ({ active }: { active: string }) => {
   const [ActiveButton, setActiveButton] = React.useState(active);
   const route = [
     { name: "Home", path: "/", icon: <HomeIcon className="h-4 w-4" /> },
     {
-      name: "Employee",
+      name: "Candidates",
       path: "/Employee",
       icon: <UsersIcon className="h-4 w-4" />,
     },
     {
-      name: "Recruitment",
+      name: "Departements",
       path: "/Recruitment",
       icon: <Zap className="h-4 w-4" />,
     },
     {
-      name: "Performance",
+      name: "Positions Requests",
       path: "/Performance",
-      icon: <TrendingUpIcon className="h-4 w-4" />,
-    },
-    {
-      name: "Payment",
-      path: "/Payment",
-      icon: <CircleDollarSign className="h-4 w-4" />,
-    },
-    {
-      name: "Rewards",
-      path: "/Rewards",
-      icon: <AwardIcon className="h-4 w-4" />,
+      icon: <PositioRequestIcon  />,
     },
   ];
 
