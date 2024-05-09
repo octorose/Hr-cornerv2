@@ -2,19 +2,15 @@
 import connect from "@/package/MongoDb/db";
 import { NextRequest, NextResponse } from "next/server";
 import pr from "../../../Models/Pr";
+import { streamToString } from "@/package/functions/StreamtoString";
 
 async function GET(req: NextRequest) {
   try {
     console.log("GET Request");
     
     await connect();
-    
-    // Fetch data from the database
-    const prData = await pr.find({}); // Only fetch Pr_Id field and exclude _id field
-
-    // Extract Pr_Ids from the fetched data
+    const prData = await pr.find({}); 
     const prIds = prData.map((item:any) => item["_doc"].Pr_Id);
-    
     
     return NextResponse.json({
       data: prIds,
@@ -24,5 +20,35 @@ async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+async function POST(req: NextRequest) {
+  try{
+    console.log("POST Request");
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    const prObj = new pr(dataObj);
+    await prObj.save();
+    return NextResponse.json({ message: "Pr Created" });
+  }
+  catch(error:any){
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+async function PUT(req: NextRequest) {
+  try {
+    console.log("PUT Request");
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    const prObj = await pr.findOneAndUpdate(
+      { Pr_Id: dataObj.Pr_Id },
+      dataObj,
+      { new: true }
+    );
+    return NextResponse.json({ message: "Pr Updated" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
 
-export { GET };
+export { GET,POST,PUT };

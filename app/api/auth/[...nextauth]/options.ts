@@ -30,6 +30,8 @@ export const options = {
     },
     async session({ session, token }: any) {
       session.id = token.id;
+      console.log("ut?");
+      
       console.log(session);
 
       return session;
