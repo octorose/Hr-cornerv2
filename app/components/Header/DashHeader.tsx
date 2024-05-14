@@ -3,10 +3,14 @@ import { Button } from "../ui/button";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
 function DashHeader({ handleSearch, employee,Topic }: any) {
+  const AnOrA = (word: string) => {
+    const vowels = ["a", "e", "i", "o", "u"];
+    return vowels.includes(word[0].toLowerCase()) ? "an" : "a";
+  };
   return (
     <div className="">
       <div className="flex flex-col  justify-center items-center mb-10">
-        <h1 className="text-2xl font-semibold">Search for an {Topic}</h1>
+        <h1 className="text-2xl font-semibold">Search for  {AnOrA(Topic)+" "+ Topic}</h1>
         <p className="text-sm text-neutral-500">
           Search for a {Topic} to view their profile
         </p>

@@ -1,7 +1,7 @@
 "use client";
 import DashHeader from "@/components/Header/DashHeader";
 import React, { useEffect, useState } from "react";
-import Card from "@/components/Card/Card";
+import PrCard from "@/components/Card/PrCard";
 import "@/styles/pagination.css";
 import Loader from "@/components/Loaders/Loader";
 import ResponsivePagination from "react-responsive-pagination";
@@ -11,7 +11,7 @@ import { Plus } from "lucide-react";
 
 import useAlert from "@/Hooks/useAlert";
 function page() {
-  interface Departement {
+  interface Pr {
     Nom: string;
     totalCandidates: number;
     Description: string;
@@ -21,14 +21,14 @@ function page() {
   let fetched: any;
   const [isLoading, setisLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [departementToEdit, setDepartementToEdit] = useState<Departement>();
+  const [PrToEdit, setPrToEdit] = useState<Pr>();
   const [data2, setData] = useState();
   const { alert, setAlert } = useAlert();
   const { alert: alert2, setAlert: setAlert2 } = useAlert();
   const fetchData = async () => {
     try {
       setisLoading(true);
-      const response = await fetch(`/api/Departement?page=${currentPage}`);
+      const response = await fetch(`/api/Pr?page=${currentPage}`);
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -40,22 +40,22 @@ function page() {
     }
     return data2;
   };
-  const AddDepartement = async (departement: any) => {
+  const AddPr = async (Pr: any) => {
     try {
-      const response = await fetch(`/api/Departement`, {
+      const response = await fetch(`/api/Pr`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(departement),
+        body: JSON.stringify(Pr),
       });
       if (!response.ok) {
-        throw new Error("Failed to add departement");
+        throw new Error("Failed to add Pr");
       }
       const data = await response.json();
       console.log(data);
       setAlert2((prev) => ({ ...prev, isOpen: false }));
-      setDepartementToEdit({
+      setPrToEdit({
         Nom: "",
         totalCandidates: 0,
         Description: "",
@@ -67,10 +67,10 @@ function page() {
       console.error(error);
     }
   };
-  const filterDepartementsByName = async (searchquery: string) => {
+  const filterPrsByName = async (searchquery: string) => {
     try {
       setisLoading(true);
-      const response = await fetch(`/api/Departement/All`);
+      const response = await fetch(`/api/Pr/All`);
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -90,17 +90,17 @@ function page() {
   };
   const perpage = 10;
   const totalPages = Math.ceil((data2 as any)?.count / perpage);
-  const UpdateDepartement = async (departement: any) => {
+  const UpdatePr = async (Pr: any) => {
     try {
-      const response = await fetch(`/api/Departement`, {
+      const response = await fetch(`/api/Pr`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(departement),
+        body: JSON.stringify(Pr),
       });
       if (!response.ok) {
-        throw new Error("Failed to update departement");
+        throw new Error("Failed to update Pr");
       }
       const data = await response.json();
       console.log(data);
@@ -121,22 +121,22 @@ function page() {
         {!isLoading ? (
           <div>
             <DashHeader
-              handleSearch={filterDepartementsByName}
+              handleSearch={filterPrsByName}
               employee={[]}
-              Topic="Departement"
+              Topic="Pr"
             />
             {data2 &&
             // @ts-ignore
-            data2.data?.length > 0 ? (
+            data2.data2?.length > 0 ? (
               <div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 w-[70%] mt-10 mx-auto">
                   {data2 &&
                     // @ts-ignore
-                    data2?.data?.map((item: any) => (
-                      <Card
-                        Departement={item}
+                    data2?.data2?.map((item: any) => (
+                      <PrCard
+                        Pr={item}
                         onClick={() => {
-                          setDepartementToEdit(item);
+                          setPrToEdit(item);
                           setAlert((prev) => ({ ...prev, isOpen: true }));
                         }}
                       />
@@ -188,16 +188,16 @@ function page() {
       <Wallettype
         isOpen={alert.isOpen}
         onSubmit={() => {
-          UpdateDepartement(departementToEdit);
-          // console.log(departementToEdit);
+          UpdatePr(PrToEdit);
+          // console.log(PrToEdit);
           setAlert((prev) => ({ ...prev, isOpen: false }));
         }}
         onCancel={() => {
           setAlert((prev) => ({ ...prev, isOpen: false }));
         }}
         alertTitle={
-          "Edit " + departementToEdit?.Nom + " Details" ||
-          "Departement" + "Details"
+          "Edit " + PrToEdit?.Nom + " Details" ||
+          "Pr" + "Details"
         }
         alertDescription={"Edit "}
         submitBtnName={"Edit"}
@@ -208,15 +208,15 @@ function page() {
         }}
       >
         <div className="text-slate-900">
-          <label htmlFor="Nom">Name of departement</label>
+          <label htmlFor="Nom">Name of Pr</label>
           <input
             className="w-full p-2 border border-neutral-200 rounded-lg"
             type="text"
             id="Nom"
             name="Nom"
-            value={departementToEdit?.Nom}
+            value={PrToEdit?.Nom}
             onChange={(e) =>
-              setDepartementToEdit((prev: any) => ({
+              setPrToEdit((prev: any) => ({
                 ...prev,
                 Nom: e.target.value,
               }))
@@ -228,9 +228,9 @@ function page() {
             type="text"
             id="manager"
             name="manager"
-            value={departementToEdit?.manager}
+            value={PrToEdit?.manager}
             onChange={(e) =>
-              setDepartementToEdit((prev: any) => ({
+              setPrToEdit((prev: any) => ({
                 ...prev,
                 manager: e.target.value,
               }))
@@ -241,15 +241,15 @@ function page() {
       <Wallettype
         isOpen={alert2.isOpen}
         onSubmit={() => {
-          AddDepartement(departementToEdit);
-          // console.log(departementToEdit);
+          AddPr(PrToEdit);
+          // console.log(PrToEdit);
           setAlert2((prev: any) => ({ ...prev, isOpen: false }));
         }}
         onCancel={() => {
           setAlert2((prev: any) => ({ ...prev, isOpen: false }));
         }}
-        alertTitle={"Add Departement"}
-        alertDescription={"Add new departement"}
+        alertTitle={"Add Pr"}
+        alertDescription={"Add new Pr"}
         submitBtnName={"Add"}
         cancelBtnName="Cancel"
         type="success"
@@ -258,17 +258,17 @@ function page() {
         }}
       >
         <div className="text-slate-900">
-          <label htmlFor="Nom">Name of departement</label>
+          <label htmlFor="Nom">Name of Pr</label>
           <input
             required={true}
             className="w-full p-2 border border-neutral-200 rounded-lg"
             type="text"
             id="Nom"
-            placeholder="Name of departement"
+            placeholder="Name of Pr"
             name="Nom"
-            value={departementToEdit?.Nom}
+            value={PrToEdit?.Nom}
             onChange={(e) =>
-              setDepartementToEdit((prev: any) => ({
+              setPrToEdit((prev: any) => ({
                 ...prev,
                 Nom: e.target.value,
               }))
@@ -282,9 +282,9 @@ function page() {
             id="manager"
             placeholder="Manager"
             name="manager"
-            value={departementToEdit?.manager}
+            value={PrToEdit?.manager}
             onChange={(e) =>
-              setDepartementToEdit((prev: any) => ({
+              setPrToEdit((prev: any) => ({
                 ...prev,
                 manager: e.target.value,
               }))
@@ -297,9 +297,9 @@ function page() {
             id="Description"
             placeholder="Description if needed"
             name="Description"
-            value={departementToEdit?.Description}
+            value={PrToEdit?.Description}
             onChange={(e) =>
-              setDepartementToEdit((prev: any) => ({
+              setPrToEdit((prev: any) => ({
                 ...prev,
                 Description: e.target.value,
               }))

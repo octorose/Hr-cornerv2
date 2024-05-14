@@ -3,6 +3,7 @@ import connect from "@/package/MongoDb/db";
 import { NextRequest, NextResponse } from "next/server";
 import pr from "../../../Models/Pr";
 import { streamToString } from "@/package/functions/StreamtoString";
+import { CandidaturesByPr } from "@/package/functions/CandidaturesByPr";
 
 async function GET(req: NextRequest) {
   try {
@@ -11,9 +12,16 @@ async function GET(req: NextRequest) {
     await connect();
     const prData = await pr.find({}); 
     const prIds = prData.map((item:any) => item["_doc"].Pr_Id);
+    const bypr = await CandidaturesByPr();
+    //add bypr to prData
+    prData.forEach((item:any) => {
+      item["_doc"].totalCandidates = bypr?.find((x:any) => x.Pr_ID === item["_doc"].Pr_Id)?.totalCandidature;
+    });
+
     
     return NextResponse.json({
       data: prIds,
+      data2: prData,
       message: "Got Pr_Ids Here",
     });
   } catch (error: any) {

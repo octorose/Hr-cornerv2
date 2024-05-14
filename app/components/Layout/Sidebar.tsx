@@ -40,7 +40,7 @@ const Sidebar = ({ active }: { active: string }) => {
     { name: "Home", path: "/", icon: <HomeIcon className="h-4 w-4" /> },
     {
       name: "Candidates",
-      path: "/Employee",
+      path: "/Candidates",
       icon: <UsersIcon className="h-4 w-4" />,
     },
     {
@@ -50,7 +50,7 @@ const Sidebar = ({ active }: { active: string }) => {
     },
     {
       name: "Positions Requests",
-      path: "/Performance",
+      path: "/Pr",
       icon: <PositioRequestIcon />,
     },
   ];

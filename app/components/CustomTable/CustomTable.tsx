@@ -253,7 +253,16 @@ const filterCandidateByName = async (name: string) => {
                                   });
                               }}
                             >
-                              {item[headres[index]]}
+                              <div className="flex justify-center gap-2 items-center">
+                                <p>{item[headres[index]]}</p>
+                                {item[headres[index]] === "Pending" ? (
+                                  <div className="bg-yellow-600 rounded-3xl w-1 h-1"></div>
+                                ): item[headres[index]] === "Yes" ? (
+                                  <div className="bg-green-600 rounded-3xl w-1 h-1"></div>
+                                ): item[headres[index]] === "No" ? (
+                                  <div className="bg-red-600 rounded-3xl w-1 h-1"></div>
+                                ):(<></>)}
+                              </div>
                             </td>
                           ) : null
                         )}
