@@ -31,3 +31,11 @@ body {
     text-wrap: balance;
   }
 }
+@layer base {
+  .font-outline-2 {
+    -webkit-text-stroke: 3px rgb(15, 31, 66);
+  }
+  .font-outline-4 {
+    -webkit-text-stroke: 4px black;
+  }
+}

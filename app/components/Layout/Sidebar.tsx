@@ -45,13 +45,13 @@ const Sidebar = ({ active }: { active: string }) => {
     },
     {
       name: "Departements",
-      path: "/Recruitment",
+      path: "/Departements",
       icon: <Zap className="h-4 w-4" />,
     },
     {
       name: "Positions Requests",
       path: "/Performance",
-      icon: <PositioRequestIcon  />,
+      icon: <PositioRequestIcon />,
     },
   ];
 

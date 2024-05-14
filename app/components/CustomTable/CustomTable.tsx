@@ -203,7 +203,7 @@ const filterCandidateByName = async (name: string) => {
     <div className="w-full mx-[10%]">
       {!isLoading ? (
         <div>
-          <DashHeader handleSearch={filterCandidateByName} Candidate={data2} />
+          <DashHeader handleSearch={filterCandidateByName} Candidate={data2} Topic="Candidate"/>
           <div className="flex justify-center">
             <table className=" ">
               <thead className="rounded-t-xl rounded-b-xl">

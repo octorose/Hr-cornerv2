@@ -1,25 +1,16 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Swal from 'sweetalert2'
-import {
-  CardTitle,
-  CardDescription,
-  CardHeader,
-  CardContent,
-  Card,
-} from "@/components/ui/card";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-import CardLineChart from "@/components/ui/charts/CardLineChart";
-import CustomTable from "@/components/CustomTable/CustomTable";
-import { useEffect, useState } from "react";
-import DashHeader from "@/components/Header/DashHeader";
-import { absenciese } from "@/data/Absencies";
 
-import useSWR, { mutate } from "swr";
+import Select from "@mui/material/Select";
+import CustomTable from "@/components/CustomTable/CustomTable";
+import { useState } from "react";
+
+
+import useSWR from "swr";
 import { Plus } from "lucide-react";
 import GlobalButton from "@/components/GlobalButton/globalButton";
 import useAlert from "@/Hooks/useAlert";
@@ -27,7 +18,7 @@ import Wallettype from "@/components/GlobalModal/Wallettype";
 
 const Candidate = ({searchParams}:any) => {
   const { alert, setAlert } = useAlert();
-  const [data, setData] = useState<any>();
+
   const [formstep, setFormStep] = useState(1);
 
   interface Candidate {
@@ -229,27 +220,25 @@ const Candidate = ({searchParams}:any) => {
           </div>
         </div>
       ) : ( */}
-        <div className="">
-          <div className="flex flex-col  mt-10 h-1/2">
-           
-            <div className="">
-              <div className="flex  flex-row  gap-4 mt-4">
-                <CustomTable
-                  headres={[
-                    "Nom",
-                    "Prenom",
-                    "Accepted",
-                    "Pr_ID",
-                    "Status",
-                    "ApplicationSource",
-                  ]}
-
-                />
-              </div>
+      <div className="">
+        <div className="flex flex-col  mt-10 h-1/2">
+          <div className="">
+            <div className="flex  flex-row  gap-4 mt-4">
+              <CustomTable
+                headres={[
+                  "Nom",
+                  "Prenom",
+                  "Accepted",
+                  "Pr_ID",
+                  "Status",
+                  "ApplicationSource",
+                ]}
+              />
             </div>
           </div>
         </div>
-      
+      </div>
+
       <div style={{ position: "fixed", bottom: "20px", right: "20px" }}>
         <GlobalButton
           onClick={() =>
@@ -271,7 +260,7 @@ const Candidate = ({searchParams}:any) => {
               };
             })
           }
-          color="primary"
+          className="bg-[#045dbb] w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
           aria-label="add"
         >
           <Plus />

@@ -2,13 +2,13 @@ import React from "react";
 import { Button } from "../ui/button";
 import { ArrowLeftIcon, SearchIcon } from "lucide-react";
 
-function DashHeader({ handleSearch, employee }: any) {
+function DashHeader({ handleSearch, employee,Topic }: any) {
   return (
     <div className="">
-      <div className="flex flex-col  justify-center items-center mb-24">
-        <h1 className="text-2xl font-semibold">Search for an Candidate</h1>
+      <div className="flex flex-col  justify-center items-center mb-10">
+        <h1 className="text-2xl font-semibold">Search for an {Topic}</h1>
         <p className="text-sm text-neutral-500">
-          Search for an Candidate to view their profile
+          Search for a {Topic} to view their profile
         </p>
       </div>
       <div className="flex items-center gap-5">
@@ -16,16 +16,16 @@ function DashHeader({ handleSearch, employee }: any) {
           <ArrowLeftIcon className="h-4 w-4" />
           <span className="sr-only">Back</span>
         </Button>
-        <h1 className="font-semibold text-lg md:text-xl">Employees</h1>
+        <h1 className="font-semibold text-lg md:text-xl">{Topic+'s'}</h1>
         <div className="ml-auto flex items-center gap-2">
           <div className="flex px-2 items-center justify-start border rounded-md w-full">
             <input
               type="text"
-              placeholder="Search for employees"
+              placeholder={"Search for "+Topic}
               className="border-0 outline-none font-bold text-ft-ts placeholder:italic bg-transparent w-full rounded-md"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  const searchquery = e.currentTarget.value; 
+                  const searchquery = e.currentTarget.value;
                   handleSearch(searchquery);
                 }
               }}

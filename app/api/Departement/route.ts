@@ -2,27 +2,48 @@ import { streamToString } from "@/package/functions/StreamtoString";
 import Departement from "../../../Models/Departements";
 import connect from "../../../package/MongoDb/db";
 import { NextRequest, NextResponse } from "next/server";
-async function GET(req: NextRequest) {
+import { NextApiRequest } from "next";
+import Departements from '../../../Models/Departements';
+import {  CandidateByDepartment } from "@/package/functions/CandidatsByDepartement";
+async function GET(req: NextApiRequest) {
   try {
     await connect();
-    const DepartementsData = await Departement.find({});
-    // console.log(DepartementsData);
+    const urlSearchParams = new URLSearchParams(req.url?.split("?")[1]);
+    const page = urlSearchParams.get("page");
+    console.log(page);
+    const DepartementsData = await Departement.find({})
+      .skip((parseInt(page as string) - 1) * 9)
+      .limit(9);
+    const DepartementsCount = await Departement.countDocuments({});
+    //how many candidates we have in each departement
+    const totalCandidatsbyDepartement = await CandidateByDepartment();
+   const totalCandidatesMap = totalCandidatsbyDepartement?.reduce(
+     (map, item) => {
+       map[item._id] = item.totalCandidates;
+       return map;
+     },
+     {}
+   );
+   // Map over DepartementsData and add totalCandidates to each department object
+   const dataWithTotalCandidates = DepartementsData.map((department) => {
+     return {
+       ...department.toObject(), // Convert Mongoose document to plain object
+       totalCandidates: totalCandidatesMap[department.Nom] || 0, // Add totalCandidates field, defaulting to 0 if not found
+      };
+    });
+
+
 
     return NextResponse.json({
-      data: DepartementsData,
-      message: "Hello from Departements",
+      data: dataWithTotalCandidates,
+      count: DepartementsCount,
+      message: "Hello from Employees",
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-// async function streamToString(stream: any) {
-//   const chunks = [];
-//   for await (const chunk of stream) {
-//     chunks.push(chunk);
-//   }
-//   return Buffer.concat(chunks).toString("ascii");
-// }
+
 async function POST(req: NextRequest) {
   try {
     await connect();
