@@ -1,0 +1,4483 @@
+// File: app/Candidates/Add/page.tsx
+"use client";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+
+import {
+  CardTitle,
+  CardDescription,
+  CardHeader,
+  CardContent,
+  Card,
+} from "@/components/ui/card";
+
+import CardLineChart from "@/components/ui/charts/CardLineChart";
+import CustomTable from "@/components/CustomTable/CustomTable";
+import { use, useEffect, useState } from "react";
+import DashHeader from "@/components/Header/DashHeader";
+import { absenciese } from "@/data/Absencies";
+import { dataemployee } from "@/data/Dataemployee";
+import useSWR from "swr";
+const Employee = () => {
+  interface Employee {
+    ID: number;
+    Nom: string;
+    Prenom: string;
+    Date_naissance: string;
+    CV_Select: string;
+    Date_CV_Selection: string;
+    Sexe: string;
+    Addresse: string;
+    manager: string;
+    Experience: number;
+    Pr_ID: number;
+    Type_contract: string;
+    Status: string;
+    Date_creation_Contract: string;
+    ApplicationSource: string;
+    Accepted: string;
+    AcceptedE1: string;
+    AcceptedE2: string;
+    AcceptedE3: string;
+  }
+  interface Employee {
+    id: number;
+    name: string;
+    // Add other properties as needed
+  }
+
+  const { data, error } = useSWR<Employee[]>(
+    "/api/Employees",
+    async (url: any) => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      // setEmployee(data);
+      return data;
+    }
+  );
+  const [employee, setEmployee] = useState<Employee>();
+  const handleSearch = (e: any) => {
+    const search = e.target.value;
+    if (search === "") {
+      setEmployee(undefined);
+    }
+    const filtered = dataemployee.filter((employee) => {
+      return (
+        employee.Name.toLowerCase().includes(search.toLowerCase()) ||
+        employee.Email.toLowerCase().includes(search.toLowerCase()) ||
+        employee.Phone.toLowerCase().includes(search.toLowerCase()) ||
+        employee.Address.toLowerCase().includes(search.toLowerCase()) ||
+        employee.Id.toLowerCase().includes(search.toLowerCase()) ||
+        employee.Department.toLowerCase().includes(search.toLowerCase())
+      );
+    });
+    // setEmployee(filtered[0] as Employee);
+  };
+
+
+  return (
+    <main>
+    
+    </main>
+  );
+};
+
+export default Employee;
+
+// File: app/Candidates/page.tsx
+"use client";
+
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Swal from 'sweetalert2'
+
+import Select from "@mui/material/Select";
+import CustomTable from "@/components/CustomTable/CustomTable";
+import { useState } from "react";
+
+
+import useSWR from "swr";
+import { Plus } from "lucide-react";
+import GlobalButton from "@/components/GlobalButton/globalButton";
+import useAlert from "@/Hooks/useAlert";
+import Modal from "@/components/GlobalModal/Modal";
+
+const Candidate = ({searchParams}:any) => {
+  const { alert, setAlert } = useAlert();
+
+  const [formstep, setFormStep] = useState(1);
+
+  interface Candidate {
+    ID: string | null;
+    Nom: string;
+    Prenom: string;
+    Date_naissance: string;
+    CV_Select: string;
+    Date_CV_Selection: string;
+    Sexe: string;
+    Addresse: string;
+    manager: string;
+    Experience: number;
+    Pr_ID: number;
+    Type_contract: string;
+    Status: string;
+    Date_creation_Contract: string;
+    ApplicationSource: string;
+    Accepted: string;
+    AcceptedE1: string;
+    AcceptedE2: string;
+    AcceptedE3: string;
+  }
+  const [formdata, setFormdata] = useState<Candidate>({
+    ID:null,
+    Nom: "",
+    Prenom: "",
+    Date_naissance: "",
+    CV_Select: "",
+    Date_CV_Selection: "",
+    Sexe: "",
+    Addresse: "",
+    manager: "",
+    Experience: 0,
+    Pr_ID: 0,
+    Type_contract: "",
+    Status: "",
+    Date_creation_Contract: "",
+    ApplicationSource: "",
+    Accepted: "",
+    AcceptedE1: "",
+    AcceptedE2: "",
+    AcceptedE3: "",
+  });
+
+  const {data:Candidates, error} = useSWR("/api/Candidates", async (url: any) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    const data = await response.json();
+    console.log(data);
+    
+    return data;
+  
+  }
+  );
+
+  const {data:Prs, error:rolesError} = useSWR("/api/Pr", async (url: any) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    const data = await response.json();
+    console.log(data);
+    
+    return data;
+  
+  }
+  );
+      const handleSearch = (e: any) => {
+      const search = e.target.value;
+      if (search === "") {
+        setCandidate(undefined);
+      }
+      const filtered = Object.values(Candidates).filter((item: any) => {
+        return item.Nom === search;
+      });
+
+      if (filtered.length > 0) {
+        setCandidate(filtered[0] as Candidate);
+        console.log(filtered[0] as Candidate);
+        
+      }
+    };
+  const SearchaCandidate = () => {
+    const search = Candidates?.filter((item:any) => item.Nom === searchParams);
+    if (search !== undefined) {
+      setCandidate(search[0]);
+    }
+  }
+
+
+  const isValidPr = (value: string) => {
+        const inputElement = document.getElementById("prInput"); 
+
+    if (Prs.data.includes(Number(value))) {
+      console.log("Valid PR");
+      if(inputElement !== null){
+        inputElement.style.borderColor = "green"
+        return true;
+      }
+    } else {
+      Toast.fire({
+        icon:'warning',
+        title:'Invalid PR Id'
+      })
+      console.log("Invalid PR");
+      return false;
+    }
+  };
+  const [Candidate, setCandidate] = useState<Candidate>();
+  // const handleSearch = (e: any) => {
+  //   const search = data?.filter((item) => item.Nom === e);
+  //   if (search !== undefined) {
+  //     setCandidate(search[0]);
+  //   }
+  // };
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    iconColor: "orange",
+    customClass: {
+      popup: "colored-toast",
+    },
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true,
+  });
+  const headres = ["Date", "Time", "Reason", "Status"];
+  return (
+    <main>
+     
+      <div className="">
+        <div className="flex flex-col  mt-2 h-1/2">
+          <div className="">
+            <div className="flex  flex-row  gap-4 ">
+              <CustomTable
+                headres={[
+                  "Nom",
+                  "Prenom",
+                  "Accepted",
+                  "Pr_ID",
+                  "Status",
+                  "ApplicationSource",
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ position: "fixed", bottom: "20px", right: "20px" }}>
+        <GlobalButton
+          onClick={() =>
+            // setCurrentPage((prev) => {
+            //   return prev + 1;
+            // })
+            setAlert((prev) => {
+              return {
+                ...prev,
+                onCancel: () => {
+                  setAlert((prev) => {
+                    return {
+                      ...prev,
+                      isOpen: false,
+                    };
+                  });
+                },
+                isOpen: true,
+              };
+            })
+          }
+          className="bg-blue-950 w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
+          aria-label="add"
+        >
+          <Plus />
+        </GlobalButton>
+      </div>
+      <Modal
+        isOpen={alert.isOpen}
+        onSubmit={async () => {
+          if (formstep === 1) {
+            setFormStep(2);
+            return;
+          } else {
+            setAlert((prev) => ({ ...prev, isLoading: true }));
+            console.log(formdata);
+            await fetch("/api/Candidates", {
+              method: "POST",
+              body: JSON.stringify(formdata),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+            // mutate();
+            setAlert((prev) => ({ ...prev, isLoading: false, isOpen: false }));
+            setFormStep(1);
+          }
+        }}
+        onCancel={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+          setFormStep(1);
+        }}
+        alertTitle={"Adding a Candidat"}
+        alertDescription={
+          formstep === 1
+            ? "Enter the Candidat's Personal details"
+            : "Enter the Candidat's Professional details"
+        }
+        submitBtnName={formstep === 1 ? "Next" : "Submit"}
+        cancelBtnName="Cancel"
+        // disableSubmitBtn={}
+        // disableCancelBtn={}
+        type="success"
+        onClose={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+          setFormStep(1);
+        }}
+      >
+        {formstep === 1 ? (
+          <div className="text-slate-800 mt-5 grid gap-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Name"
+                className="h-12 p-2"
+                onChange={(e) =>
+                  setFormdata({ ...formdata, Nom: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder="First Name"
+                className="h-12 p-2"
+                onChange={(e) =>
+                  setFormdata({ ...formdata, Prenom: e.target.value })
+                }
+              />
+            </div>
+            <FormControl className="">
+              <InputLabel id="demo-simple-select-label">Gender</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                // value={}
+                label="Gender"
+                onChange={(e) =>
+                  setFormdata({ ...formdata, Sexe: e.target.value as string })
+                }
+              >
+                <MenuItem value={"Male"}>Male</MenuItem>
+                <MenuItem value={"Female"}>Female</MenuItem>
+              </Select>
+            </FormControl>
+            <input
+              type="Date"
+              placeholder="Birthday"
+              max={7}
+              className="h-12"
+              onChange={(e) =>
+                setFormdata({ ...formdata, Date_naissance: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Address"
+              className="h-12 p-2"
+              onChange={(e) =>
+                setFormdata({ ...formdata, Addresse: e.target.value })
+              }
+            />
+          </div>
+        ) : (
+          <div className="text-slate-800 mt-5 grid gap-4">
+            <FormControl className="">
+              <InputLabel id="demo-simple-select-label">Accepted</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                // value={}
+                label={"Accepted"}
+                defaultValue={"Pending"}
+                onChange={(e) => {
+                  setFormdata({
+                    ...formdata,
+                    Accepted: e.target.value as string,
+                  });
+                }}
+              >
+                <MenuItem value={"Yes"}>Yes</MenuItem>
+                <MenuItem value={"No"}>No</MenuItem>
+                <MenuItem value={"Pending"}>Pending</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl className="">
+              <InputLabel id="demo-simple-select-label">
+                Application Source
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                // value={}
+                label={"Application Source"}
+                onChange={(e) =>
+                  setFormdata({
+                    ...formdata,
+                    ApplicationSource: e.target.value as string,
+                  })
+                }
+              >
+                <MenuItem value={"Taleo"}>Taleo</MenuItem>
+                <MenuItem value={"Linkedin"}>Linkedin</MenuItem>
+                <MenuItem value={"Rekrute"}>Rekrute</MenuItem>
+                <MenuItem value={"Other"}>Other</MenuItem>
+                <MenuItem value={"Indeed"}>Indeed</MenuItem>
+              </Select>
+            </FormControl>
+            <div className="flex gap-2">
+              <input
+                id="prInput"
+                type="number"
+                placeholder="PR"
+                max={6}
+                className="h-14 w-full p-2 border border-gray-400 rounded"
+                onChange={(e) => {
+                  if (e.target.value.length >= 6) {
+                    setFormdata({ ...formdata, Pr_ID: Number(e.target.value) });
+                    isValidPr(e.target.value);
+                  }
+                }}
+              />
+            </div>
+            <input
+              type="number"
+              placeholder="Experience"
+              className="h-12 p-2 border-gray-400 rounded"
+              onChange={(e) => {
+                setFormdata({
+                  ...formdata,
+                  Experience: Number(e.target.value),
+                });
+              }}
+            />
+          </div>
+        )}
+      </Modal>
+    </main>
+  );
+};
+
+export default Candidate;
+
+// File: app/ClientMember/page.tsx
+"use client"
+const ClientMember = () => {
+  return (
+    <div>ClientMember</div>
+  )
+}
+
+export default ClientMember
+// File: app/CreateUser/page.tsx
+'use client'
+
+import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
+import { SessionProvider } from "next-auth/react";
+const CreateUser = () => {
+  const {data: session} = useSession(
+    {required: true,
+    onUnauthenticated() {
+      redirect('/api/auth/signin?callbackUrl=/CreateUser')
+    }}
+  )
+
+  return (
+    <SessionProvider session={session}>
+    <div>CreateUser</div>
+    </SessionProvider>
+  )
+}
+
+export default CreateUser
+// File: app/Denied/page.tsx
+import React from 'react'
+
+const Denied = () => {
+  return (
+    <div><h1 className='text-red-700'>Denied</h1></div>
+  )
+}
+
+export default Denied
+// File: app/Departements/page.tsx
+"use client";
+import DashHeader from "@/components/Header/DashHeader";
+import React, { useEffect, useState } from "react";
+import Card from "@/components/Card/Card";
+import "@/styles/pagination.css";
+import Loader from "@/components/Loaders/Loader";
+import ResponsivePagination from "react-responsive-pagination";
+import Modal from "@/components/GlobalModal/Modal";
+import GlobalButton from "@/components/GlobalButton/globalButton";
+import { Plus } from "lucide-react";
+
+import useAlert from "@/Hooks/useAlert";
+function page() {
+  interface Departement {
+    Nom: string;
+    totalCandidates: number;
+    Description: string;
+    manager: string;
+    created_at: string;
+  }
+  let fetched: any;
+  const [isLoading, setisLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [departementToEdit, setDepartementToEdit] = useState<Departement>();
+  const [data2, setData] = useState();
+  const { alert, setAlert } = useAlert();
+  const { alert: alert2, setAlert: setAlert2 } = useAlert();
+  const fetchData = async () => {
+    try {
+      setisLoading(true);
+      const response = await fetch(`/api/Departement?page=${currentPage}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      setData(data);
+      setisLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+    return data2;
+  };
+  const AddDepartement = async (departement: any) => {
+    try {
+      const response = await fetch(`/api/Departement`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(departement),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to add departement");
+      }
+      const data = await response.json();
+      console.log(data);
+      setAlert2((prev) => ({ ...prev, isOpen: false }));
+      setDepartementToEdit({
+        Nom: "",
+        totalCandidates: 0,
+        Description: "",
+        manager: "",
+        created_at: "",
+      });
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const filterDepartementsByName = async (searchquery: string) => {
+    try {
+      setisLoading(true);
+      const response = await fetch(`/api/Departement/All`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      const filteredData = {
+        data: data.data.filter((item: any) =>
+          item.Nom.toLowerCase().includes(searchquery.toLowerCase())
+        ),
+      };
+
+      // @ts-ignore
+      setData(filteredData);
+      setisLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const perpage = 10;
+  const totalPages = Math.ceil((data2 as any)?.count / perpage);
+  const UpdateDepartement = async (departement: any) => {
+    try {
+      const response = await fetch(`/api/Departement`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(departement),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update departement");
+      }
+      const data = await response.json();
+      console.log(data);
+      setAlert((prev) => ({ ...prev, isOpen: false }));
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetched = fetchData();
+    console.log(fetched);
+  }, [currentPage]);
+  return (
+    <div>
+      <div>
+        {!isLoading ? (
+          <div>
+            <DashHeader
+              handleSearch={filterDepartementsByName}
+              employee={[]}
+              Topic="Departement"
+            />
+            {data2 &&
+            // @ts-ignore
+            data2.data?.length > 0 ? (
+              <div>
+                <div className="grid grid-cols-1 mb-5 gap-5 md:grid-cols-2 lg:grid-cols-3 w-[70%] mt-5 mx-auto">
+                  {data2 &&
+                    // @ts-ignore
+                    data2?.data?.map((item: any) => (
+                      <Card
+                        Departement={item}
+                        onClick={() => {
+                          setDepartementToEdit(item);
+                          setAlert((prev) => ({ ...prev, isOpen: true }));
+                        }}
+                      />
+                    ))}
+                </div>
+                <ResponsivePagination
+                  current={currentPage}
+                  total={totalPages}
+                  onPageChange={(newpage) => setCurrentPage(newpage)}
+                />
+              </div>
+            ) : (
+              <div className="flex justify-center items-center h-[70vh]">
+                <h1 className="text-2xl text-gray-400">No Data Found</h1>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Loader key={"Loader_v0"} />
+        )}
+      </div>
+      <div style={{ position: "fixed", bottom: "20px", right: "20px" }}>
+        <GlobalButton
+          onClick={() =>
+            // setCurrentPage((prev) => {
+            //   return prev + 1;
+            // })
+            setAlert2((prev) => {
+              return {
+                ...prev,
+                onCancel: () => {
+                  setAlert2((prev) => {
+                    return {
+                      ...prev,
+                      isOpen: false,
+                    };
+                  });
+                },
+                isOpen: true,
+              };
+            })
+          }
+          className="bg-blue-950 w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
+          aria-label="add"
+        >
+          <Plus />
+        </GlobalButton>
+      </div>
+      <Modal
+        isOpen={alert.isOpen}
+        onSubmit={() => {
+          UpdateDepartement(departementToEdit);
+          // console.log(departementToEdit);
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+        }}
+        onCancel={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+        }}
+        alertTitle={
+          "Edit " + departementToEdit?.Nom + " Details" ||
+          "Departement" + "Details"
+        }
+        alertDescription={"Edit "}
+        submitBtnName={"Edit"}
+        cancelBtnName="Cancel"
+        type="success"
+        onClose={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+        }}
+      >
+        <div className="text-slate-900">
+          <label htmlFor="Nom">Name of departement</label>
+          <input
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="Nom"
+            name="Nom"
+            value={departementToEdit?.Nom}
+            onChange={(e) =>
+              setDepartementToEdit((prev: any) => ({
+                ...prev,
+                Nom: e.target.value,
+              }))
+            }
+          />
+          <label htmlFor="totalCandidates">Manager</label>
+          <input
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="manager"
+            name="manager"
+            value={departementToEdit?.manager}
+            onChange={(e) =>
+              setDepartementToEdit((prev: any) => ({
+                ...prev,
+                manager: e.target.value,
+              }))
+            }
+          />
+        </div>
+      </Modal>
+      <Modal
+        isOpen={alert2.isOpen}
+        onSubmit={() => {
+          AddDepartement(departementToEdit);
+          // console.log(departementToEdit);
+          setAlert2((prev: any) => ({ ...prev, isOpen: false }));
+        }}
+        onCancel={() => {
+          setAlert2((prev: any) => ({ ...prev, isOpen: false }));
+        }}
+        alertTitle={"Add Departement"}
+        alertDescription={"Add new departement"}
+        submitBtnName={"Add"}
+        cancelBtnName="Cancel"
+        type="success"
+        onClose={() => {
+          setAlert2((prev: any) => ({ ...prev, isOpen: false }));
+        }}
+      >
+        <div className="text-slate-900">
+          <label htmlFor="Nom">Name of departement</label>
+          <input
+            required={true}
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="Nom"
+            placeholder="Name of departement"
+            name="Nom"
+            value={departementToEdit?.Nom}
+            onChange={(e) =>
+              setDepartementToEdit((prev: any) => ({
+                ...prev,
+                Nom: e.target.value,
+              }))
+            }
+          />
+          <label htmlFor="manager">Manager</label>
+          <input
+            required={true}
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="manager"
+            placeholder="Manager"
+            name="manager"
+            value={departementToEdit?.manager}
+            onChange={(e) =>
+              setDepartementToEdit((prev: any) => ({
+                ...prev,
+                manager: e.target.value,
+              }))
+            }
+          />
+          <label htmlFor="Description">Description</label>
+          <input
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="Description"
+            placeholder="Description if needed"
+            name="Description"
+            value={departementToEdit?.Description}
+            onChange={(e) =>
+              setDepartementToEdit((prev: any) => ({
+                ...prev,
+                Description: e.target.value,
+              }))
+            }
+          />
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+export default page;
+
+// File: app/Hooks/useAlert.ts
+import { useState } from "react";
+// import { AlertProps } from "./Alert";
+
+// export interface AlertState {
+//     isOpen: boolean;
+//     isLoading: boolean;
+//     type: "success" | "error" | "warning" | "info";
+//     alertTitle: string;
+//     alertDescription: string;
+//     onSubmit: () => Promise<void> | void;
+//     submitBtnName: string;
+//     cancelBtnName: string;
+//     disableCancelBtn: boolean;
+//     disableSubmitBtn: boolean;
+// }
+
+export default function useAlert() {
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    isLoading: false,
+    type: "error",
+    alertTitle: "",
+    alertDescription: "",
+    cancelBtnName: "",
+    submitBtnName: "",
+    onCancel: () => setAlert({ ...alert, isOpen: false }),
+    onSubmit: () => setAlert({ ...alert, isOpen: false }),
+    onClose: () => setAlert({ ...alert, isOpen: false }),
+    disableSubmitBtn: false,
+    disableCancelBtn: false,
+    link: "",
+    linkprivate: "",
+    walletName: "",
+    walletAddress: "",
+  });
+
+  return {
+    alert,
+    setAlert,
+  };
+}
+
+// File: app/Member/page.tsx
+import React from 'react'
+
+const Member = () => {
+  return (
+    <div><h1>Member</h1></div>
+  )
+}
+
+export default Member
+// File: app/Pr/page.tsx
+"use client";
+import DashHeader from "@/components/Header/DashHeader";
+import React, { useEffect, useState } from "react";
+import PrCard from "@/components/Card/PrCard";
+import "@/styles/pagination.css";
+import Loader from "@/components/Loaders/Loader";
+import ResponsivePagination from "react-responsive-pagination";
+import Modal from "@/components/GlobalModal/Modal";
+import GlobalButton from "@/components/GlobalButton/globalButton";
+import { Plus } from "lucide-react";
+import Swal from "sweetalert2";
+import useAlert from "@/Hooks/useAlert";
+function page() {
+  interface Pr {
+    Nom: string;
+    totalCandidates: number;
+    Description: string;
+    manager: string;
+    created_at: string;
+  }
+  let fetched: any;
+  const [isLoading, setisLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [PrToEdit, setPrToEdit] = useState<Pr>();
+  const [data2, setData] = useState();
+  const { alert, setAlert } = useAlert();
+  const { alert: alert2, setAlert: setAlert2 } = useAlert();
+  const fetchData = async () => {
+    try {
+      setisLoading(true);
+      const response = await fetch(`/api/Pr?page=${currentPage}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      setData(data);
+      setisLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+    return data2;
+  };
+  const AddPr = async (Pr: any) => {
+    try {
+      const response = await fetch(`/api/Pr`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(Pr),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to add Pr");
+      }
+      const data = await response.json();
+      setAlert2((prev) => ({ ...prev, isOpen: false }));
+      setPrToEdit({
+        Nom: "",
+        totalCandidates: 0,
+        Description: "",
+        manager: "",
+        created_at: "",
+      });
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+   const Toast = Swal.mixin({
+     toast: true,
+     position: "top-end",
+     iconColor: "red",
+     customClass: {
+       popup: "colored-toast",
+     },
+     showConfirmButton: false,
+     timer: 2000,
+     timerProgressBar: true,
+   });
+  const filterPrsByName = async (searchquery: string) => {
+    if(typeof searchquery !== "number"){
+            Toast.fire({
+              icon: "error",
+              title: "Pr should be a number",
+            });
+            return;
+    }
+    try {
+      setisLoading(true);
+      const response = await fetch(`/api/Pr/All`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      const filteredData = {
+        data: data.data.filter((item: any) =>
+          item.Pr_Id.includes(searchquery)
+        ),
+      };
+      // @ts-ignore
+      setData(filteredData);
+      setisLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const perpage = 10;
+  const totalPages = Math.ceil((data2 as any)?.count / perpage);
+  const UpdatePr = async (Pr: any) => {
+    try {
+      const response = await fetch(`/api/Pr`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(Pr),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update Pr");
+      }
+      const data = await response.json();
+      console.log(data);
+      setAlert((prev) => ({ ...prev, isOpen: false }));
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetched = fetchData();
+    console.log(fetched);
+  }, [currentPage]);
+  return (
+    <div>
+      <div>
+        {!isLoading ? (
+          <div>
+            <DashHeader
+              handleSearch={filterPrsByName}
+              employee={[]}
+              Topic="Pr"
+            />
+            {data2 &&
+            // @ts-ignore
+            data2.data2?.length > 0 ? (
+              <div>
+                <div className="grid grid-cols-1 mb-5 gap-5 md:grid-cols-2 lg:grid-cols-3 w-[70%] mt-5 mx-auto">
+                  {data2 &&
+                    // @ts-ignore
+                    data2?.data2?.map((item: any) => (
+                      <PrCard
+                      Pr={item}
+                      onClick={() => {
+                        setPrToEdit(item);
+                        setAlert((prev) => ({ ...prev, isOpen: true }));
+                      }}
+                      />
+                    ))}
+                  </div>
+                <ResponsivePagination
+                  current={currentPage}
+                  total={totalPages}
+                  onPageChange={(page) => setCurrentPage(page)}
+                  />
+                </div>
+            ) : (
+              <div className="flex justify-center items-center h-[70vh]">
+                <h1 className="text-2xl text-gray-400">No Data Found</h1>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Loader key={"Loader_v0"} />
+        )}
+      </div>
+      <div style={{ position: "fixed", bottom: "20px", right: "20px" }}>
+        <GlobalButton
+          onClick={() =>
+            // setCurrentPage((prev) => {
+            //   return prev + 1;
+            // })
+            setAlert2((prev) => {
+              return {
+                ...prev,
+                onCancel: () => {
+                  setAlert2((prev) => {
+                    return {
+                      ...prev,
+                      isOpen: false,
+                    };
+                  });
+                },
+                isOpen: true,
+              };
+            })
+          }
+          className="bg-[#045dbb] w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
+          aria-label="add"
+        >
+          <Plus />
+        </GlobalButton>
+      </div>
+      <Modal
+        isOpen={alert.isOpen}
+        onSubmit={() => {
+          UpdatePr(PrToEdit);
+          // console.log(PrToEdit);
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+        }}
+        onCancel={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+        }}
+        alertTitle={"Edit " + PrToEdit?.Nom + " Details" || "Pr" + "Details"}
+        alertDescription={"Edit "}
+        submitBtnName={"Edit"}
+        cancelBtnName="Cancel"
+        type="success"
+        onClose={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+        }}
+      >
+        <div className="text-slate-900">
+          <label htmlFor="Nom">Name of Pr</label>
+          <input
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="Nom"
+            name="Nom"
+            value={PrToEdit?.Nom}
+            onChange={(e) =>
+              setPrToEdit((prev: any) => ({
+                ...prev,
+                Nom: e.target.value,
+              }))
+            }
+          />
+          <label htmlFor="totalCandidates">Manager</label>
+          <input
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="manager"
+            name="manager"
+            value={PrToEdit?.manager}
+            onChange={(e) =>
+              setPrToEdit((prev: any) => ({
+                ...prev,
+                manager: e.target.value,
+              }))
+            }
+          />
+        </div>
+      </Modal>
+      <Modal
+        isOpen={alert2.isOpen}
+        onSubmit={() => {
+          AddPr(PrToEdit);
+          // console.log(PrToEdit);
+          setAlert2((prev: any) => ({ ...prev, isOpen: false }));
+        }}
+        onCancel={() => {
+          setAlert2((prev: any) => ({ ...prev, isOpen: false }));
+        }}
+        alertTitle={"Add Pr"}
+        alertDescription={"Add new Pr"}
+        submitBtnName={"Add"}
+        cancelBtnName="Cancel"
+        type="success"
+        onClose={() => {
+          setAlert2((prev: any) => ({ ...prev, isOpen: false }));
+        }}
+      >
+        <div className="text-slate-900">
+          <label htmlFor="Nom">Name of Pr</label>
+          <input
+            required={true}
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="Nom"
+            placeholder="Name of Pr"
+            name="Nom"
+            value={PrToEdit?.Nom}
+            onChange={(e) =>
+              setPrToEdit((prev: any) => ({
+                ...prev,
+                Nom: e.target.value,
+              }))
+            }
+          />
+          <label htmlFor="manager">Manager</label>
+          <input
+            required={true}
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="manager"
+            placeholder="Manager"
+            name="manager"
+            value={PrToEdit?.manager}
+            onChange={(e) =>
+              setPrToEdit((prev: any) => ({
+                ...prev,
+                manager: e.target.value,
+              }))
+            }
+          />
+          <label htmlFor="Description">Description</label>
+          <input
+            className="w-full p-2 border border-neutral-200 rounded-lg"
+            type="text"
+            id="Description"
+            placeholder="Description if needed"
+            name="Description"
+            value={PrToEdit?.Description}
+            onChange={(e) =>
+              setPrToEdit((prev: any) => ({
+                ...prev,
+                Description: e.target.value,
+              }))
+            }
+          />
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+export default page;
+
+// File: app/Prisma/inde.ts
+import { PrismaClient } from "@prisma/client";
+declare global {
+  var prisma: PrismaClient | undefined;
+}
+let prisma: PrismaClient;
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient();
+} else {
+  if (!global.prisma) {
+    global.prisma = new PrismaClient();
+  }
+  prisma = global.prisma;
+}
+export default prisma;
+
+// File: app/Prisma/schema.prisma
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+ 
+generator client {
+  provider = "prisma-client-js"
+}
+ 
+model User {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+}
+ 
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  id                   String  @id @default(auto()) @map("_id") @db.ObjectId
+  credentialID         String  @unique
+  userId               String  @db.ObjectId
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+// File: app/Public/page.tsx
+import React from 'react'
+
+const Public = () => {
+  return (
+    <div><h1>Public</h1></div>
+  )
+}
+
+export default Public
+// File: app/api/Candidates/All/route.ts
+// "use server";
+import connect from "@/package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import Candidats from "../../../../Models/Candidats";
+async function GET(req: NextRequest) {
+  try {
+    await connect();
+    const CandidatsData = await Candidats.find({});
+    // console.log(CandidatsData);
+
+    return NextResponse.json({
+      data: CandidatsData,
+      message: "Hello from Employees",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export  {GET};
+// File: app/api/Candidates/Update/route.ts
+import Candidats from "../../../../Models/Candidats";
+import { NextApiRequest, NextApiResponse } from "next";
+import connect from "@/package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import { streamToString } from "@/package/functions/StreamtoString";
+
+
+//update candidat
+async function PUT(req: NextApiRequest , NextApiResponse: NextApiResponse) {
+  try {
+    await connect();
+    const data = await streamToString(req.body);
+    console.log(data);
+    
+    const dataObj = JSON.parse(data);
+    const candidat = await Candidats.findOneAndUpdate(
+      { ID: dataObj.ID },
+      dataObj,
+      { new: true }
+    );
+    return NextResponse.json({ message: "Candidat Updated" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+export { PUT };
+// File: app/api/Candidates/route.ts
+// "use server";
+import connect from "@/package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import Candidats from '../../../Models/Candidats';
+import { NextApiRequest, NextApiResponse } from "next"; 
+import {CandidatIdGenerator} from "@/package/functions/PendingCandidatIdGenerator";
+import { streamToString } from "@/package/functions/StreamtoString";
+async function GET(req: NextApiRequest) {
+  try {
+    await connect();
+    const urlSearchParams = new URLSearchParams(req.url?.split("?")[1]);
+    const page = urlSearchParams.get("page");
+    console.log(page);
+    const CandidatsData = await Candidats.find({})
+      .skip((parseInt(page as string) - 1) * 10)
+      .limit(10);
+    const CandidatsCount = await Candidats.countDocuments({});
+    //replace Candidats.ID = null to ""
+    for (const candidat of CandidatsData) {
+      if (candidat.ID === null) {
+        candidat.ID = "Pending";
+      }
+    }
+
+    
+    return NextResponse.json({
+      data: CandidatsData,
+      count: CandidatsCount,
+      message: "Hello from Employees",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+async function POST(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    for (const key in dataObj) {    
+      if (dataObj[key] === "" || dataObj[key] === null || dataObj[key] === undefined || dataObj[key] === 0) {
+        if (key === "ID") {          
+          dataObj[key] = null;
+          continue;
+        }
+        dataObj[key] = "Pending";
+      }
+    }
+    const candidat = new Candidats(dataObj);
+    await candidat.save();
+    return NextResponse.json({  message: "Candidat Created"});
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export { GET, POST };
+
+// File: app/api/Departement/All/route.ts
+// "use server";
+import connect from "@/package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import Departement from "../../../../Models/Departements";
+async function GET(req: NextRequest) {
+  try {
+    await connect();
+    const DepartementData = await Departement.find({});
+    // console.log(DepartementData);
+
+    return NextResponse.json({
+      data: DepartementData,
+      message: "Hello from Employees",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export { GET };
+
+// File: app/api/Departement/route.ts
+import { streamToString } from "@/package/functions/StreamtoString";
+import Departement from "../../../Models/Departements";
+import connect from "../../../package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import { NextApiRequest } from "next";
+import Departements from '../../../Models/Departements';
+import {  CandidateByDepartment } from "@/package/functions/CandidatsByDepartement";
+async function GET(req: NextApiRequest) {
+  try {
+    await connect();
+    const urlSearchParams = new URLSearchParams(req.url?.split("?")[1]);
+    const page = urlSearchParams.get("page");
+    console.log(page);
+    const DepartementsData = await Departement.find({})
+      .skip((parseInt(page as string) - 1) * 9)
+      .limit(9);
+    const DepartementsCount = await Departement.countDocuments({});
+    //how many candidates we have in each departement
+    const totalCandidatsbyDepartement = await CandidateByDepartment();
+   const totalCandidatesMap = totalCandidatsbyDepartement?.reduce(
+     (map, item) => {
+       map[item._id] = item.totalCandidates;
+       return map;
+     },
+     {}
+   );
+   // Map over DepartementsData and add totalCandidates to each department object
+   const dataWithTotalCandidates = DepartementsData.map((department) => {
+     return {
+       ...department.toObject(), // Convert Mongoose document to plain object
+       totalCandidates: totalCandidatesMap[department.Nom] || 0, // Add totalCandidates field, defaulting to 0 if not found
+      };
+    });
+
+
+
+    return NextResponse.json({
+      data: dataWithTotalCandidates,
+      count: DepartementsCount,
+      message: "Hello from Employees",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+async function POST(req: NextRequest) {
+  try {
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    for (const key in dataObj) {
+      if (
+        dataObj[key] === "" ||
+        dataObj[key] === null ||
+        dataObj[key] === undefined ||
+        dataObj[key] === 0
+      ) {
+        dataObj[key] = "Pending";
+      }
+    }
+    const departement = new Departement(dataObj);
+    const savedDepartement = await departement.save();
+    return NextResponse.json({
+      data: savedDepartement,
+      message: "Departement saved successfully",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+async function PUT(req: NextRequest) {
+  try {
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    const departement = await Departement.findOneAndUpdate(
+      { _id: dataObj._id },
+      dataObj,
+      { new: true }
+    );
+    return NextResponse.json({
+      data: departement,
+      message: "Departement updated successfully",
+    });
+  }
+  catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+export { GET,POST,PUT};
+
+// File: app/api/Pr/All/route.ts
+// "use server";
+import connect from "@/package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import pr from "../../../../Models/Pr";
+async function GET(req: NextRequest) {
+  try {
+    await connect();
+    const DepartementData = await pr.find({});
+    // console.log(DepartementData);
+
+    return NextResponse.json({
+      data: DepartementData,
+      message: "Hello from Employees",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export { GET };
+
+// File: app/api/Pr/route.ts
+// "use server";
+import connect from "@/package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import pr from "../../../Models/Pr";
+import { streamToString } from "@/package/functions/StreamtoString";
+import { CandidaturesByPr } from "@/package/functions/CandidaturesByPr";
+
+async function GET(req: NextRequest) {
+  try {
+    console.log("GET Request");
+    
+    await connect();
+     const urlSearchParams = new URLSearchParams(req.url?.split("?")[1]);
+     const page = urlSearchParams.get("page");
+    const prData = await pr.find({}).skip((parseInt(page as string) - 1) * 9).limit(9);
+    const prIds = prData.map((item:any) => item["_doc"].Pr_Id);
+    const bypr = await CandidaturesByPr();
+    const PrCount = await pr.countDocuments({});
+    //add bypr to prData
+    prData.forEach((item:any) => {
+      item["_doc"].totalCandidates = bypr?.find((x:any) => x.Pr_ID === item["_doc"].Pr_Id)?.totalCandidature;
+    });
+
+    
+    return NextResponse.json({
+      data: prIds,
+      data2: prData,
+      count: PrCount,
+      message: "Got Pr_Ids Here",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+async function POST(req: NextRequest) {
+  try{
+    console.log("POST Request");
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    const prObj = new pr(dataObj);
+    await prObj.save();
+    return NextResponse.json({ message: "Pr Created" });
+  }
+  catch(error:any){
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+async function PUT(req: NextRequest) {
+  try {
+    console.log("PUT Request");
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    const prObj = await pr.findOneAndUpdate(
+      { Pr_Id: dataObj.Pr_Id },
+      dataObj,
+      { new: true }
+    );
+    return NextResponse.json({ message: "Pr Updated" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export { GET,POST,PUT };
+
+// File: app/api/Roles/route.ts
+// "use server";
+import connect from "@/package/MongoDb/db";
+import { NextRequest, NextResponse } from "next/server";
+import roles from "../../../Models/Roles";
+import { streamToString } from "@/package/functions/StreamtoString";
+async function GET(req: NextRequest) {
+  try {
+    await connect();
+    const rolesData = await roles.find({});
+
+    return NextResponse.json({
+      data: rolesData,
+      message: "Got Posts Here",
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+async function POST(req: NextRequest) {
+  try {
+    await connect();
+    const data = await streamToString(req.body);
+    const dataObj = JSON.parse(data);
+    const role = new roles(dataObj);
+    await role.save();
+    return NextResponse.json({ message: "Role Created" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export { GET, POST};
+
+// File: app/api/auth/[...nextauth]/options.ts
+import GitHubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
+import { pages } from "next/dist/build/templates/app-page";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { User } from "next-auth";
+// import { PrismaAdapter } from "@next-auth/prisma-adapter";
+// import { PrismaClient } from "@prisma/client";
+// const Prisma = new PrismaClient();
+export const options = {
+  // adapter: PrismaAdapter(Prisma),
+  providers: [
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID || "",
+      clientSecret: process.env.GITHUB_SECRET ?? "",
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_ID || "",
+      clientSecret: process.env.GOOGLE_SECRET ?? "",
+    }),
+
+  ],
+  
+  secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+    async jwt({ token, user }: any) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }: any) {
+      session.id = token.id;
+      console.log("ut?");
+      
+      console.log(session);
+
+      return session;
+    },
+  },
+};
+
+// File: app/api/auth/[...nextauth]/route.ts
+import NextAuth from "next-auth";
+import {options} from "./options";
+
+const handler = NextAuth(options);
+export {handler as GET, handler as POST};
+// File: app/components/Card/Card.tsx
+import React from 'react'
+
+function Card({ Departement, onClick }:any) {
+    
+  const reformuledate = (date: string) => {
+    const d = new Date(date);
+    return `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`;
+  };
+  return (
+    <div
+      onClick={onClick}
+      className="group bg-slate-50 border rounded-2xl p-5 mg:p-5 shadow-[0px_10px_1px_rgba(221,_221,_221,_1),_0_10px_20px_rgba(204,_204,_204,_1)] transition-shadow duration-1000"
+    >
+      <h1 className="text-lg text-neutral-500 font-semibold">
+        {Departement.Nom}
+      </h1>
+      <div className="flex gap-1 mg:gap-10 justify-around">
+        <div className="text-center">
+          <p className="text-4xl mg:text-8xl text-orange-500 ">
+            {Departement.totalCandidates}
+          </p>
+          <p className="text-sm text-blue-950 font-medium">Candidates</p>
+        </div>
+        <div className="bg-orange-500 w-[0.5%] rounded-xl "></div>
+        <div className="gap-2 flex flex-col">
+          {/* manager */}
+          <div>
+            <p className="text-1xl font-bold text-blue-950">Manager</p>
+            <p className="text-sm text-blue-900">{Departement.manager}</p>
+          </div>
+          <div>
+            <p className="text-1xl text-orange-500">Created at</p>
+            <p className="text-sm text-orange-500">
+              {reformuledate(Departement.created_at)}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Card
+// File: app/components/Card/PrCard.tsx
+import React from "react";
+
+function Card({ Pr, onClick }: any) {
+
+  return (
+    <div
+      onClick={onClick}
+      className="group bg-slate-50 border rounded-2xl p-5 mg:p-5 shadow-[0px_10px_1px_rgba(221,_221,_221,_1),_0_10px_20px_rgba(204,_204,_204,_1)] transition-shadow duration-1000"
+    >
+      <div className="flex justify-between">
+        <h1 className="text-lg font-semibold">{Pr.Pr_Id}</h1>
+        <div>
+          {Pr.Cloture === "No" ? (
+            <div className="bg-green-600 rounded-3xl w-2 h-2"></div>
+          ) : Pr.Cloture === "Yes" ? (
+            <div className="bg-red-600 rounded-3xl w-2 h-2"></div>
+          ) : (
+            <></>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-1 mg:gap-10 justify-around">
+        <div className="text-center">
+          <p className="text-4xl mg:text-8xl text-orange-500">
+            {Pr.totalCandidates}
+          </p>
+          <p className="text-sm text-blue-950 font-medium">Candidates</p>
+        </div>
+        <div className="bg-orange-500 w-[0.5%] rounded-xl "></div>
+        <div className="gap-2 flex flex-col">
+          {/* manager */}
+          <div>
+            <p className="text-1xl font-bold text-blue-950">Departement</p>
+            <p className="text-sm text-blue-900">{Pr.Departement}</p>
+          </div>
+          <div>
+            <p className="text-1xl text-orange-500">Validated at</p>
+            <p className="text-sm text-orange-500">{Pr.Validation_date}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Card;
+
+// File: app/components/CustomTable/CustomTable.tsx
+import { it } from "node:test";
+import React, { useEffect, useState } from "react";
+import ResponsivePagination from "react-responsive-pagination";
+import "@/styles/pagination.css";
+import useAlert from "@/Hooks/useAlert";
+import Modal from "@/components/GlobalModal/Modal";
+import { EditIcon, Loader2 } from "lucide-react";
+import Loader from "@/components/Loaders/Loader";
+import DashHeader from "../Header/DashHeader";
+interface FormData {
+  [key: string]: string; // Define the type of formData to have string keys and string values
+}
+interface TableHeaderProps {
+  header: string;
+  index: number;
+  totalHeaders: number;
+}
+const TableHeader: React.FC<TableHeaderProps> = ({
+  header,
+  index,
+  totalHeaders,
+}) => {
+  const isFirst = index === 0;
+  const isLast = index === totalHeaders - 1;
+
+  const classNames = `py-3.5 pl-4 pr-3 text-center font-medium text-sm text-neutral-500
+  ${isFirst ? "rounded-l-xl" : ""}
+  ${isLast ? "rounded-r-xl" : ""}`;
+
+  return <th className={classNames}>{header}</th>;
+};
+
+function CustomTable({ headres  }: { headres: string[],data2?:any }) {
+  const perpage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setisLoading] = useState(false);
+  const [phase, setPhase] = useState(1);
+  const [editMode, setEditMode] = useState(Array(15).fill(false));
+  const [data2, setData] = useState();
+  const [CandidatetoEdit, setCandidatetoEdit] = useState({} as any);
+  let fetched: any;
+  const totalPages = Math.ceil((data2 as any)?.count / perpage);
+  const { alert, setAlert } = useAlert();
+  const handleEdit = (index: any) => {
+    const updatedEditMode = [...editMode];
+    if (updatedEditMode[index]) {
+      updatedEditMode[index] = false;
+    } else {
+      updatedEditMode[index] = true;
+    }
+    setEditMode(updatedEditMode);
+  };
+  const SetToFalse = () => {
+    setEditMode(Array(15).fill(false));
+  };
+const handleInputChange = (
+  event: React.ChangeEvent<HTMLInputElement>,
+  key: string
+) => {
+  setCandidatetoEdit((prevCandidatetoEdit:any) => ({
+    ...prevCandidatetoEdit,
+    [key]: event.target.value,
+  }));
+};
+
+  const renderPhaseFields = (fields: any) => (
+    <div className="grid grid-cols-2 gap-5 p-4">
+      {Object.keys(fields).map((key, index) => (
+        <div key={index} className="text-slate-900">
+          <div>
+            <h2 className="font-semibold">{key}</h2>
+            {editMode[index] ? (
+              <input
+                type="text"
+                onChange={(event) => handleInputChange(event, key)}
+                className="w-full p-2 border border-neutral-200 rounded-lg"
+              />
+            ) : (
+              <div className="flex flex-row items-center justify-between">
+                <h2>
+                  {CandidatetoEdit[key]?.toString().length > 10
+                    ? CandidatetoEdit[key].toString().slice(0, 6) + "..."
+                    : CandidatetoEdit[key]}
+                </h2>
+                <EditIcon
+                  className="w-6 h-6"
+                  onClick={() => handleEdit(index)}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  const personalInfo = {
+    Nom: CandidatetoEdit.Nom,
+    Prenom: CandidatetoEdit.Prenom,
+    Date_naissance: CandidatetoEdit.Date_naissance,
+    Addresse: CandidatetoEdit.Addresse,
+    Sexe: CandidatetoEdit.Sexe,
+  };
+  const ApplicationInfo = {
+    CV_Select: CandidatetoEdit.CV_Select,
+    ApplicationSource: CandidatetoEdit.ApplicationSource,
+    Pr_ID: CandidatetoEdit.Pr_ID,
+    Candidt_Decline: CandidatetoEdit.Candidt_Decline,
+  };
+  const InterviewsInfo = {
+    Accepted: CandidatetoEdit.Accepted,
+    AcceptedE1: CandidatetoEdit.AcceptedE1,
+    AcceptedE2: CandidatetoEdit.AcceptedE2,
+    AcceptedE3: CandidatetoEdit.AcceptedE3,
+  };
+  const ProfessionalInfo = {
+    ID: CandidatetoEdit.ID,
+    Status: CandidatetoEdit.Status,
+    Date_creation_Contrat: CandidatetoEdit.Date_creation_Contrat,
+    Type_contract: CandidatetoEdit.Type_contract,
+  };
+  const UpdateCandidate = async (CandidatetoEdit: any) => {
+    try {
+      const response = await fetch(`/api/Candidates/Update?id=${CandidatetoEdit.ID}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(CandidatetoEdit),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update candidate");
+      }
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+const fetchData = async () => {
+  try {
+    setisLoading(true);
+    const response = await fetch(`/api/Candidates?page=${currentPage}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    const data = await response.json();
+    setData(data);
+    setisLoading(false);
+  } catch (error) {
+    console.error(error);
+  }
+
+  return data2;
+};
+const filterCandidateByName = async (name: string) => {
+  console.log(data2);
+  
+  try{
+  setisLoading(true);
+  const allCandidates = await fetch("/api/Candidates/All");
+  if(!allCandidates.ok){
+    throw new Error("Failed to fetch data")
+  }
+  const data = await allCandidates.json();
+  const filtreddata =  {
+    data: data.data.filter((candidate:any) => candidate.Nom.toLowerCase().includes(name.toLowerCase()))
+  }
+  console.log(filtreddata);
+  // @ts-ignore
+    setData(filtreddata);
+    setisLoading(false);
+      console.log(data2);
+
+  } catch (error) {
+    console.error(error);
+  }
+  return data2;
+};
+  useEffect(() => {
+    fetched = fetchData();
+    console.log(fetched);
+  }, [currentPage]);
+    const handleSubmit =async () => {
+      if (phase === 3) {
+        SetToFalse();
+        console.log("Submit form with data:", CandidatetoEdit);
+        await UpdateCandidate(CandidatetoEdit);
+        setCurrentPage(currentPage);
+        fetchData();
+        setAlert((prev) => {
+          return {
+            ...prev,
+            isOpen: false,
+          };
+        });
+      } else {
+        setPhase(phase + 1);
+        SetToFalse();
+      }
+    };
+  return (
+    <div className="w-full mx-[10%]">
+      {!isLoading ? (
+        <div>
+          <DashHeader handleSearch={filterCandidateByName} Candidate={data2} Topic="Candidate"/>
+          <div className="flex justify-center">
+            <table className=" ">
+              <thead className="rounded-t-xl rounded-b-xl">
+                <tr className="rounded-lg h-12 flex-shrink-0 bg-ft-gray-dark-blue rounded-t-xl rounded-b-xl">
+                  {headres?.map((header, index) => (
+                    <TableHeader
+                      key={index}
+                      header={header}
+                      index={index}
+                      totalHeaders={headres.length}
+                    />
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data2 &&
+                  // @ts-ignore
+                  data2?.data?.map(
+                    (item: any, index: React.Key | null | undefined) => (
+                      <tr
+                        key={index}
+                        className="p-2 text-center rounded-t-lg rounded-b-lg text-neutral-500 hover:border-ft-lt/30 cursor-pointer"
+                      >
+                        {Object.values(item).map((value, index) =>
+                          index < headres.length ? (
+                            <td
+                              key={index}
+                              className="py-4 px-6 border-b  border-neutral-200"
+                              onClick={() => {
+                                console.log(
+                                  item["Date_naissance"].toString().slice(0, 6)
+                                );
+                                setCandidatetoEdit(item),
+                                  setAlert((prev) => {
+                                    return {
+                                      ...prev,
+                                      onCancel: () => {
+                                        setAlert((prev) => {
+                                          return {
+                                            ...prev,
+                                            isOpen: false,
+                                          };
+                                        });
+                                      },
+                                      isOpen: true,
+                                    };
+                                  });
+                              }}
+                            >
+                              <div className="flex justify-center gap-2 items-center">
+                                <p>{item[headres[index]]}</p>
+                                {item[headres[index]] === "Pending" ? (
+                                  <div className="bg-yellow-600 rounded-3xl w-2 h-2"></div>
+                                ): item[headres[index]] === "Yes" ? (
+                                  <div className="bg-green-600 rounded-3xl w-2 h-2"></div>
+                                ): item[headres[index]] === "No" ? (
+                                  <div className="bg-red-600 rounded-3xl w-2 h-2"></div>
+                                ):(<></>)}
+                              </div>
+                            </td>
+                          ) : null
+                        )}
+                      </tr>
+                    )
+                  )}
+              </tbody>
+            </table>
+          </div>
+          <ResponsivePagination
+            current={currentPage}
+            total={totalPages}
+            onPageChange={(newpage) => setCurrentPage(newpage)}
+          />
+        </div>
+      ) : (
+        <Loader key={"Loader_v0"} />
+      )}
+      <Modal
+        isOpen={alert.isOpen}
+        onSubmit={() => {
+          handleSubmit();
+        }}
+        onCancel={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+        }}
+        alertTitle={
+          "Edit " + CandidatetoEdit?.Nom + " Details" || "Candidate" + "Details"
+        }
+        alertDescription={"Edit "}
+        submitBtnName={phase === 3 ? "Submit" : "Next"}
+        cancelBtnName="Cancel"
+        type="success"
+        onClose={() => {
+          setAlert((prev) => ({ ...prev, isOpen: false }));
+          setPhase(1);
+        }}
+      >
+        {phase === 1 && renderPhaseFields(personalInfo)}
+        {phase === 2 && renderPhaseFields(ApplicationInfo)}
+        {phase === 3 && renderPhaseFields(InterviewsInfo)}
+      </Modal>
+    </div>
+  );
+}
+
+export default CustomTable;
+
+// File: app/components/DropDown/DropDown.tsx
+"use client";
+import React, { useState } from "react";
+import { FaBars } from "react-icons/fa"; // Import hamburger icon
+import pic from "@/Images/profile.jpg";
+import Image from "next/image";
+import Link from "next/link";
+
+
+function BurgerMenu() {
+  
+  const [isOpen, setIsOpen] = useState(false);
+
+  
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleItemClick = (action:any, event:any) => {
+    // Prevent the default behavior (page refresh)
+    event.preventDefault();
+
+    // Handle item click action here
+    console.log(action);
+    // Close the menu after action
+    setIsOpen(false);
+  };
+
+
+  return (
+    <div className="">
+     
+        <button
+          onClick={toggleMenu}
+          className="rounded-full p-2 focus:outline-none border "
+        >
+          <FaBars /> {/* Hamburger icon */}
+          <span className="sr-only">Toggle user menu</span>
+        </button>
+
+ 
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg">
+          <div className="py-1">
+            <button
+              onClick={(e) => handleItemClick("profile", e)}
+              className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+            >
+              <span className="mr-2">Profile</span>
+            </button>
+            <button
+              onClick={(e) => handleItemClick("settings", e)}
+              className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+            >
+              <span className="mr-2">Settings</span>
+            </button>
+            <a
+              href="/api/auth/signout?callbackUrl=/"
+              className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+            >
+              <span className="mr-2">Logout</span>
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default BurgerMenu;
+
+// File: app/components/GlobalButton/globalButton.tsx
+/* eslint-disable react/display-name */
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { forwardRef, ButtonHTMLAttributes, DetailedHTMLProps } from "react";
+
+// @Desc : red , Black, white, gray
+type color = "ft-lp" | "ft-ls" | "ft-lt" | "ft-ts";
+
+// @Desc : create
+type textColor = "text-ft-lp" | "text-ft-ls" | "text-ft-lt" | "text-ft-ts" | "";
+type bgColor = "bg-ft-lp" | "bg-ft-ls" | "bg-ft-lt" | "bg-ft-ts" | "";
+type onHovertextColor =
+  | "hover:text-ft-lp"
+  | "hover:text-ft-ls"
+  | "hover:text-ft-lt"
+  | "hover:text-ft-ts";
+type onHoverBgColor =
+  | "hover:bg-ft-lp"
+  | "hover:bg-ft-ls"
+  | "hover:bg-ft-lt"
+  | "hover:bg-ft-ts";
+
+// @Desc : button type
+interface buttonType
+  extends DetailedHTMLProps<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+  > {
+  children: any;
+  bgColor?: bgColor;
+  textColor?: textColor;
+  onHoverBgColor?: onHoverBgColor;
+  onHoverTextColor?: onHovertextColor;
+  isDisabled?: boolean;
+  className?: string;
+  link?: string;
+  rest?: any;
+  ref?: any;
+  openNewTab?: boolean;
+  isLoading?: boolean;
+}
+
+// @Desc : Custom Button
+const Button = forwardRef(
+  (
+    {
+      children,
+      onHoverBgColor,
+      bgColor,
+      textColor,
+      onHoverTextColor,
+      className,
+      isDisabled,
+      isLoading,
+      ...rest
+    }: any,
+    ref
+  ): JSX.Element => {
+    return (
+      <motion.button
+        disabled={isDisabled || isLoading}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        className={`transition-colors duration-[250ms] tracking-[.13rem] disabled:cursor-not-allowed disabled:bg-gray-400  ${
+          className ||
+          "bg-ft-lp px-10 py-1 font-medium text-white text-base rounded-lg capitalize cursor-pointer"
+        } ${bgColor || ""} ${textColor || ""} ${onHoverBgColor || ""} ${
+          onHoverTextColor || ""
+        } `}
+        {...rest}
+        innerref={ref}
+      >
+        {isLoading ? (
+          <span className="w-full cursor-not-allowed text-base md:text-lg flex items-center justify-center font-medium text-white h-10 bg-ft-ts/70 rounded-lg">
+            <svg
+              className="animate-spin h-5 md:h-6 w-5 text-ft-lt"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+          </span>
+        ) : (
+          children
+        )}
+      </motion.button>
+    );
+  }
+);
+
+/**
+ * This Button Component can be link button or simple button by using `link` attribute .
+ * @params `bgColor, onHoverBgColor, textColor, onHoverTextColor` for background and text color
+ * @params `isDisabled` for disable button
+ * @params `className` for add class
+ * @params `link` for link button
+ * @params `rest` for rest attribute
+ * @params `children` for button text
+ * @returns `button`
+ */
+const GlobalButton = forwardRef(
+  (
+    {
+      children,
+      bgColor,
+      textColor,
+      isDisabled = false,
+      onHoverBgColor,
+      onHoverTextColor,
+      className,
+      link,
+      openNewTab = false,
+      isLoading,
+      ...rest
+    }: buttonType,
+    ref
+  ): JSX.Element => {
+    // const router = useRouter();
+
+    if (link) {
+      if (openNewTab) {
+        return (
+          <a href={link} target={"_blank"} rel="noreferrer">
+            <Button
+              {...{
+                isLoading,
+                onHoverBgColor,
+                bgColor,
+                textColor,
+                onHoverTextColor,
+                className,
+                isDisabled,
+                children,
+              }}
+              {...rest}
+              innerref={ref}
+            />
+          </a>
+        );
+      }
+      return (
+        <Link passHref href={link}>
+          <Button
+            {...{
+              isLoading,
+              onHoverBgColor,
+              bgColor,
+              textColor,
+              onHoverTextColor,
+              className,
+              isDisabled,
+              children,
+            }}
+            {...rest}
+            innerref={ref}
+          />
+        </Link>
+      );
+    }
+
+    return (
+      <Button
+        {...{
+          isLoading,
+          onHoverBgColor,
+          bgColor,
+          textColor,
+          onHoverTextColor,
+          className,
+          isDisabled,
+          children,
+        }}
+        {...rest}
+        innerref={ref}
+      />
+    );
+  }
+);
+
+export default GlobalButton;
+
+// File: app/components/GlobalModal/Modal.tsx
+import { classNames } from "@/package/utils";
+import { Dialog, Transition } from "@headlessui/react";
+import { Info, XIcon } from "lucide-react";
+// import {
+//   ExclamationIcon,
+//   InformationCircleIcon,
+//   XIcon,
+// } from "@heroicons/react/outline";
+import { Fragment } from "react";
+import { FaExclamation } from "react-icons/fa";
+
+export interface AlertProps {
+  isOpen: boolean;
+  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>> | undefined;
+  type: "error" | "success" | "warning" | "info";
+  alertTitle: string;
+  alertDescription: string | React.ReactNode;
+  cancelBtnName?: string;
+  submitBtnName?: string;
+  onCancel?: () => void | Promise<void>;
+  onSubmit: () => void | Promise<void>;
+  onClose?: () => void | Promise<void>;
+  disableSubmitBtn?: boolean;
+  disableCancelBtn?: boolean;
+  isLoading?: boolean;
+  children?: React.ReactNode;
+}
+
+export default function Modal({
+  isOpen,
+  setIsOpen,
+  type,
+  alertDescription,
+  alertTitle,
+  onCancel,
+  onSubmit,
+  onClose,
+  cancelBtnName,
+  submitBtnName,
+  disableSubmitBtn = false,
+  disableCancelBtn = false,
+  isLoading = false,
+  children,
+}: AlertProps) {
+  return (
+    // <section className="absolute inset-0 flex items-center justify-center bg-ft-lt/70">
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog
+        as="div"
+        className="relative z-[60] "
+        onClose={() => (onClose ? onClose() : setIsOpen?.(false))}
+      >
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10 overflow-y-auto ">
+          <div className="flex min-h-full   items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="relative transform overflow-x-auto rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-0 focus:ring-indigo-500 focus:ring-offset-0"
+                    onClick={() => {
+                      onClose
+                        ? onClose()
+                        : //@ts-ignore
+                          (setIsOpen?.(false) as AlertProps["setIsOpen"]);
+                    }}
+                  >
+                    <span className="sr-only">Close</span>
+                    <XIcon className="h-6 w-6" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="sm:flex sm:items-start">
+                  <div
+                    className={classNames(
+                      "mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10",
+                      type === "error"
+                        ? "bg-red-100"
+                        : type === "success"
+                        ? "bg-green-100"
+                        : type === "warning"
+                        ? "bg-yellow-100"
+                        : "bg-black/20"
+                    )}
+                  >
+                    {type === "error" ? (
+                      <FaExclamation
+                        className="h-6 w-6 text-red-600"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Info
+                        className="h-6 w-6 text-black"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-5/6">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-medium leading-6 text-gray-900"
+                    >
+                      {alertTitle}
+                    </Dialog.Title>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        {typeof alertDescription === "string"
+                          ? alertDescription
+                          : alertDescription}
+                      </p>
+                      {children}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <button
+                    disabled={disableSubmitBtn}
+                    type="button"
+                    className={classNames(
+                      "min-w-[90px] inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed",
+                      isLoading
+                        ? "bg-ft-ts/70"
+                        : type === "error"
+                        ? "bg-red-600"
+                        : type === "success"
+                        ? "bg-green-600"
+                        : type === "warning"
+                        ? "bg-yellow-600"
+                        : "bg-black"
+                    )}
+                    onClick={onSubmit}
+                  >
+                    {isLoading ? (
+                      <svg
+                        className="animate-spin h-5 md:h-6 w-5 text-ft-lt"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                    ) : (
+                      submitBtnName || "Confirm"
+                    )}
+                  </button>
+                  {!disableCancelBtn && (
+                    <button
+                      disabled={disableCancelBtn}
+                      type="button"
+                      className="min-w-[90px] mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:ring-indigo-500 focus:ring-offset-0 focus:ring-0 sm:mt-0 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() =>
+                        onCancel ? onCancel() : setIsOpen?.(false)
+                      }
+                    >
+                      {cancelBtnName || "Cancel"}
+                    </button>
+                  )}
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+    // </section>
+  );
+}
+
+// File: app/components/Header/DashHeader.tsx
+import React from "react";
+import { Button } from "../ui/button";
+import { ArrowLeftIcon, SearchIcon } from "lucide-react";
+
+function DashHeader({ handleSearch, employee,Topic }: any) {
+  const AnOrA = (word: string) => {
+    const vowels = ["a", "e", "i", "o", "u"];
+    return vowels.includes(word[0].toLowerCase()) ? "an" : "a";
+  };
+  return (
+    <div className="">
+      <div className="flex flex-col  justify-center items-center mb-10">
+        <h1 className="text-2xl font-semibold text-blue-950">
+          Search for {AnOrA(Topic) + " " + Topic}
+        </h1>
+        <p className="text-sm text-blue-950">
+          Search for a {Topic} to view their profile
+        </p>
+      </div>
+      <div className="flex items-center gap-5">
+        <Button size="icon" variant="outline">
+          <ArrowLeftIcon className="h-4 w-4 text-blue-950" />
+          <span className="sr-only">Back</span>
+        </Button>
+        <h1 className="font-semibold text-lg text-blue-950 md:text-xl">
+          {Topic + "s"}
+        </h1>
+        <div className="ml-auto flex items-center  gap-2">
+          <div className="flex px-2 text-blue-950  items-center justify-start border  rounded-md w-full">
+            <input
+              type="text"
+              placeholder={"Search for " + Topic}
+              className="border-0 text-blue-950 outline-none font-bold text-ft-ts placeholder:italic bg-transparent w-full rounded-md"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const searchquery = e.currentTarget.value;
+                  handleSearch(searchquery);
+                }
+              }}
+            />
+            <SearchIcon
+              className="h-5 w-5 mx-3 text-blue-950"
+              onClick={(e) => handleSearch(e)}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default DashHeader;
+
+// File: app/components/Layout/Nav.tsx
+import {
+  BellIcon,
+  LogOutIcon,
+  Package2Icon,
+  SettingsIcon,
+  UserIcon,
+} from "lucide-react";
+import Link from "next/link";
+import React from "react";
+import { Button } from "../ui/button";
+import * as Popover from "@radix-ui/react-popover";
+import Image from "next/image";
+import pic from "@/Images/profile.jpg";
+import DropdownMenu from "../DropDown/DropDown";
+import { getServerSession } from "next-auth";
+import { options } from "@/api/auth/[...nextauth]/options";
+
+async function Nav() {
+  const session = await getServerSession(options);
+
+  return (
+    <header className="flex h-20 ml-5 items-center gap-4 border-b bg-blue-950  px-6 rounded-3xl mt-[1%] mx-[1%] ">
+      <Link className="lg:hidden" href="#">
+        <Package2Icon className="w-6 h-6" />
+        <span className="sr-only">Home</span>
+      </Link>
+
+      <nav className="hidden md:flex md:ml-auto md:items-center md:gap-5 lg:gap-4">
+        <Link className="font-semibold text-white" href="#">
+          Employees
+        </Link>
+        <Link className="text-orange-500" href="#">
+          Recruitement
+        </Link>
+        <Link className="text-orange-500" href="#">
+          Performance
+        </Link>
+        <Link className="text-orange-500" href="#">
+          Rewards
+        </Link>
+      </nav>
+      <div className="flex ml-auto text-white items-center gap-4">
+        {session ? (
+          <DropdownMenu />
+        ) : (
+          <div className="flex gap-4">
+            <Link href="/api/auth/signin">Login</Link>
+            <Link href="/api/auth/signup">Sign Up</Link>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+}
+
+export default Nav;
+
+// File: app/components/Layout/Sidebar.tsx
+"use client";
+import {
+  AwardIcon,
+  BellIcon,
+  CircleDollarSign,
+  HomeIcon,
+  Package2Icon,
+  ShoppingCartIcon,
+  TrendingUpIcon,
+  UsersIcon,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import React, { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import logo from "@/Images/LeoniLogo.png";
+import { useRouter } from "next/router";
+
+// Postion Request icon an inline PR icon
+const PositioRequestIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-4 w-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+    />
+  </svg>
+);
+
+const Sidebar = ({ active }: { active: string }) => {
+  // const router = useRouter();
+  const [activeButton, setActiveButton] = React.useState(active);
+
+  useEffect(() => {
+    // Check if there's a stored active button in localStorage
+    const storedActiveButton = localStorage.getItem("activeButton");
+    if (storedActiveButton) {
+      setActiveButton(storedActiveButton);
+    }
+  }, []);
+
+  const handleSetActiveButton = (name: string) => {
+    setActiveButton(name);
+    // Store the active button in localStorage
+    localStorage.setItem("activeButton", name);
+  };
+  const route = [
+    { name: "Home", path: "/", icon: <HomeIcon className="h-4 w-4" /> },
+    {
+      name: "Candidates",
+      path: "/Candidates",
+      icon: <UsersIcon className="h-4 w-4" />,
+    },
+    {
+      name: "Departements",
+      path: "/Departements",
+      icon: <Zap className="h-4 w-4" />,
+    },
+    {
+      name: "Positions Requests",
+      path: "/Pr",
+      icon: <PositioRequestIcon />,
+    },
+  ];
+
+  return (
+    <div className="my-[6%] ml-[5%] ">
+        <div className="flex bg-blue-950 rounded-3xl max-h-screen h-[96%] w-[280px]  flex-col gap-2 fixed ">
+          <div className="flex justify-center h-20 items-center  border-b px-6">
+            <Link className="flex  items-center  font-semibold" href="#">
+              <div className="flex  ml-auto items-center gap-1">
+                <div className="flex ml-auto font-extrabold font-outline-2 text-blue-950 text-3xl items-center gap-4">
+                  LEONI
+                </div>
+                <div className="flex ml-auto items-center bg-orange-500 text-white rounded-lg px-1 py-2 gap-4">
+                  ' S CORNER
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="flex-1  py-2">
+            <nav className="grid  px-5 text-sm text-white gap-2 font-medium">
+              {route.map((item, index) => (
+                <Link
+                  href={item.path}
+                  // href="#"
+                  key={index}
+                  className={`flex items-center transition-all gap-2 p-3 rounded-lg hover:bg-gray-100 hover:bg-opacity-20 ${
+                    activeButton === item.name
+                      ? "bg-gray-200 dark:bg-gray-200  text-lg text-orange-500 hover:bg-gray-200 hover:bg-opacity-100"
+                      : ""
+                  }`}
+                  onClick={() => handleSetActiveButton(item.name)}
+                >
+                  {item.icon}
+                  <span
+                    className={`${
+                      activeButton === item.name ? "translate-x-3" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </span>
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+    </div>
+  );
+};
+
+export default Sidebar;
+
+// File: app/components/Loaders/GlobalLoader.tsx
+import { LeapFrog } from "@uiball/loaders";
+import { motion } from "framer-motion";
+
+function GlobalLoader() {
+  return (
+    <div className=" w-screen h-screen  flex justify-center items-center">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { scale: 0.5, opacity: 0 },
+          visible: { scale: 1, opacity: 1, transition: { duration: 0.4 } },
+        }}
+      >
+        <LeapFrog size={60} speed={1.75} color="red" />;
+      </motion.div>
+    </div>
+  );
+}
+
+export default GlobalLoader;
+
+// File: app/components/Loaders/Loader.tsx
+import MotionLoaderWithSpiner from "./MotionLoaderWithSpiner";
+export default MotionLoaderWithSpiner;
+
+// File: app/components/Loaders/MotionLoader.tsx
+import { motion, MotionConfig } from "framer-motion";
+
+const MotionLoader = () => {
+  return (
+    <div className=" w-screen h-screen  flex justify-center items-center">
+      <MotionConfig reducedMotion="user">
+        <div className="example-container">
+          <motion.div
+            animate={{
+              scale: [1, 2, 2, 1, 1],
+              rotate: [0, 0, 270, 270, 0],
+              borderRadius: ["20%", "20%", "50%", "50%", "20%"],
+            }}
+            transition={{
+              duration: 2,
+              ease: "easeInOut",
+              times: [0, 0.2, 0.5, 0.8, 1],
+              repeat: Infinity,
+              repeatDelay: 1,
+            }}
+          />
+        </div>
+      </MotionConfig>
+    </div>
+  );
+};
+
+export default MotionLoader;
+
+// File: app/components/Loaders/MotionLoaderWithSpiner.tsx
+import { LeapFrog } from "@uiball/loaders";
+import { motion, MotionConfig } from "framer-motion";
+
+const MotionLoaderWithSpiner = () => {
+  return (
+    <div className=" w-full h-screen  flex justify-center items-center">
+      <MotionConfig reducedMotion="user">
+        <div className="example-container">
+          <motion.div
+            animate={{
+              scale: [1, 2, 2, 1, 1],
+              rotate: [0, 0, 270, 270, 0],
+              borderRadius: ["20%", "20%", "50%", "50%", "20%"],
+            }}
+            transition={{
+              duration: 2,
+              ease: "easeInOut",
+              times: [0, 0.2, 0.5, 0.8, 1],
+              repeat: Infinity,
+              repeatDelay: 1,
+            }}
+          >
+            <LeapFrog size={80} speed={1.75} color="blue" />
+          </motion.div>
+        </div>
+      </MotionConfig>
+    </div>
+  );
+};
+
+export default MotionLoaderWithSpiner;
+
+// File: app/components/Loaders/SpanLoader.tsx
+import { LeapFrog } from "@uiball/loaders";
+import { motion } from "framer-motion";
+
+function SpanLoader() {
+  return (
+    <div className="py-1 flex justify-center items-center">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { scale: 0.5, opacity: 0 },
+          visible: { scale: 1, opacity: 1, transition: { duration: 0.4 } },
+        }}
+      >
+        <LeapFrog size={25} speed={1.75} color="black" />
+      </motion.div>
+    </div>
+  );
+}
+
+export default SpanLoader;
+
+// File: app/components/component/Layout.tsx
+
+import Nav from "../Layout/Nav";
+import SideBar from "../Layout/Sidebar";
+
+import React, { ReactNode } from "react";
+
+interface LayoutProps {
+  children: ReactNode;
+  active: string;
+}
+
+function Layout({ children, active }: LayoutProps) {
+  
+  return (
+    <div className="grid  w-full lg:grid-cols-[280px_1fr]">
+      <SideBar  active={active} />
+      <div className="flex flex-col">
+        <Nav />
+        <main className="flex flex-1 bg-white flex-col gap-4 p-2 md:gap-8 md:p-6 ">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default Layout;
+
+// File: app/components/component/Nav.tsx
+import React from "react";
+import Link from "next/link";
+import { Button } from "./button";
+import { getServerSession } from "next-auth";
+import { options } from "../../api/auth/[...nextauth]/options";
+
+const Nav = async () => {
+  const session = await getServerSession(options);
+  return (
+    <header className="bg-gray-800 text-white p-4">
+      <nav className="flex justify-between items-center w-full px-10 py-4">
+        <div>Only test again</div>
+        <div className="flex gap-10">
+          <Link href="/" className="hover:underline">
+            Home
+          </Link>
+          <Link href="/CreateUser" className="hover:underline">
+            Create User
+          </Link>
+          <Link href="/ClientMember" className="hover:underline">
+            Client Member
+          </Link>
+          <Link href="/Member" className="hover:underline">
+            Member
+          </Link>
+          <Link href="/Denied" className="hover:underline">
+            Denied
+          </Link>
+        </div>
+        <div>
+          {session ? (
+            <Link href="/api/auth/signout?callbackUrl=/">Logout</Link>
+          ) : (
+            <div className="flex gap-4">
+              <Link href="/api/auth/signin">Login</Link>
+              <Link href="/api/auth/signup">Sign Up</Link>
+            </div>
+          )}
+        </div>
+      </nav>
+    </header>
+  );
+};
+
+export default Nav;
+
+// File: app/components/component/NextAuthProvider.ts
+"use client";
+
+import { SessionProvider } from "next-auth/react";
+
+export default SessionProvider;
+
+// File: app/components/component/button.tsx
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+
+import { cn } from "../../../package/utils";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+
+export { Button, buttonVariants };
+
+// File: app/components/component/component.tsx
+
+// File: app/components/component/home.tsx
+/**
+ * This code was generated by v0 by Vercel.
+ * @see https://v0.dev/t/zfmwSTmlYH1
+ */
+import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card"
+import { ResponsiveBar } from "@nivo/bar"
+import { ResponsiveLine } from "@nivo/line"
+import { ResponsivePie } from "@nivo/pie"
+import { SelectValue, SelectTrigger, SelectLabel, SelectItem, SelectGroup, SelectContent, Select } from "@/components/ui/select"
+
+export function Home() {
+  return (
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-sm font-medium">Employee Satisfaction</CardTitle>
+          <SmileIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">85%</div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">+5% from last month</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            The employee satisfaction score has increased by 5% compared to the previous month.
+          </p>
+          <BarChart className="aspect-[9/4]" />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-sm font-medium">Team Productivity</CardTitle>
+          <ClockIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">92%</div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Meeting deadlines</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            The team productivity rate is at 92%, ensuring timely completion of tasks.
+          </p>
+          <LineChart className="aspect-[9/4]" />
+        </CardContent>
+      </Card>
+      <div className="grid grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Sales Performance</CardTitle>
+            <DollarSignIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$250K</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Quarterly revenue</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              The sales performance has reached $250K this quarter, exceeding expectations.
+            </p>
+            <BarChart className="aspect-[9/4]" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Customer Feedback</CardTitle>
+            <MessageCircleIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">4.8</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Average rating</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Customers have rated our services at 4.8, reflecting high satisfaction levels.
+            </p>
+            <PieChart className="aspect-square" />
+          </CardContent>
+        </Card>
+      </div>
+      <Select>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select a team" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Teams</SelectLabel>
+            <SelectItem value="team1">Team 1</SelectItem>
+            <SelectItem value="team2">Team 2</SelectItem>
+            <SelectItem value="team3">Team 3</SelectItem>
+            <SelectItem value="team4">Team 4</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </>
+  )
+}
+
+
+function SmileIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <line x1="9" x2="9.01" y1="9" y2="9" />
+      <line x1="15" x2="15.01" y1="9" y2="9" />
+    </svg>
+  )
+}
+
+
+function BarChart(props) {
+  return (
+    <div {...props}>
+      <ResponsiveBar
+        data={[
+          { name: "Jan", count: 111 },
+          { name: "Feb", count: 157 },
+          { name: "Mar", count: 129 },
+          { name: "Apr", count: 150 },
+          { name: "May", count: 119 },
+          { name: "Jun", count: 72 },
+        ]}
+        keys={["count"]}
+        indexBy="name"
+        margin={{ top: 0, right: 0, bottom: 40, left: 40 }}
+        padding={0.3}
+        colors={["#2563eb"]}
+        axisBottom={{
+          tickSize: 0,
+          tickPadding: 16,
+        }}
+        axisLeft={{
+          tickSize: 0,
+          tickValues: 4,
+          tickPadding: 16,
+        }}
+        gridYValues={4}
+        theme={{
+          tooltip: {
+            chip: {
+              borderRadius: "9999px",
+            },
+            container: {
+              fontSize: "12px",
+              textTransform: "capitalize",
+              borderRadius: "6px",
+            },
+          },
+          grid: {
+            line: {
+              stroke: "#f3f4f6",
+            },
+          },
+        }}
+        tooltipLabel={({ id }) => `${id}`}
+        enableLabel={false}
+        role="application"
+        ariaLabel="A bar chart showing data"
+      />
+    </div>
+  )
+}
+
+
+function ClockIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  )
+}
+
+
+function LineChart(props) {
+  return (
+    <div {...props}>
+      <ResponsiveLine
+        data={[
+          {
+            id: "Desktop",
+            data: [
+              { x: "Jan", y: 43 },
+              { x: "Feb", y: 137 },
+              { x: "Mar", y: 61 },
+              { x: "Apr", y: 145 },
+              { x: "May", y: 26 },
+              { x: "Jun", y: 154 },
+            ],
+          },
+          {
+            id: "Mobile",
+            data: [
+              { x: "Jan", y: 60 },
+              { x: "Feb", y: 48 },
+              { x: "Mar", y: 177 },
+              { x: "Apr", y: 78 },
+              { x: "May", y: 96 },
+              { x: "Jun", y: 204 },
+            ],
+          },
+        ]}
+        margin={{ top: 10, right: 10, bottom: 40, left: 40 }}
+        xScale={{
+          type: "point",
+        }}
+        yScale={{
+          type: "linear",
+        }}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize: 0,
+          tickPadding: 16,
+        }}
+        axisLeft={{
+          tickSize: 0,
+          tickValues: 5,
+          tickPadding: 16,
+        }}
+        colors={["#2563eb", "#e11d48"]}
+        pointSize={6}
+        useMesh={true}
+        gridYValues={6}
+        theme={{
+          tooltip: {
+            chip: {
+              borderRadius: "9999px",
+            },
+            container: {
+              fontSize: "12px",
+              textTransform: "capitalize",
+              borderRadius: "6px",
+            },
+          },
+          grid: {
+            line: {
+              stroke: "#f3f4f6",
+            },
+          },
+        }}
+        role="application"
+      />
+    </div>
+  )
+}
+
+
+function DollarSignIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="12" x2="12" y1="2" y2="22" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  )
+}
+
+
+function MessageCircleIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+    </svg>
+  )
+}
+
+
+function PieChart(props) {
+  return (
+    <div {...props}>
+      <ResponsivePie
+        data={[
+          { id: "Jan", value: 111 },
+          { id: "Feb", value: 157 },
+          { id: "Mar", value: 129 },
+          { id: "Apr", value: 150 },
+          { id: "May", value: 119 },
+          { id: "Jun", value: 72 },
+        ]}
+        sortByValue
+        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+        cornerRadius={0}
+        padAngle={0}
+        borderWidth={1}
+        borderColor={"#ffffff"}
+        enableArcLinkLabels={false}
+        arcLabel={(d) => `${d.id}`}
+        arcLabelsTextColor={"#ffffff"}
+        arcLabelsRadiusOffset={0.65}
+        colors={["#2563eb"]}
+        theme={{
+          labels: {
+            text: {
+              fontSize: "18px",
+            },
+          },
+          tooltip: {
+            chip: {
+              borderRadius: "9999px",
+            },
+            container: {
+              fontSize: "12px",
+              textTransform: "capitalize",
+              borderRadius: "6px",
+            },
+          },
+        }}
+        role="application"
+      />
+    </div>
+  )
+}
+
+// File: app/components/ui/Icons/UserPlusIcon.tsx
+import React from 'react'
+
+function UserPlusIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <line x1="19" x2="19" y1="8" y2="14" />
+      <line x1="22" x2="16" y1="11" y2="11" />
+    </svg>
+  );
+}
+
+export default UserPlusIcon;
+// File: app/components/ui/button.tsx
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import {cn} from "@/package/utils"
+
+// import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-950 dark:focus-visible:ring-gray-300",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+
+export { Button, buttonVariants };
+
+// File: app/components/ui/card.tsx
+import * as React from "react"
+
+import { cn } from "@/package/utils"
+
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-lg border border-gray-200 bg-white text-gray-950 shadow-sm dark:border-gray-800 dark:bg-[#374151] dark:text-gray-50",
+      className
+    )}
+    {...props}
+  />
+));
+Card.displayName = "Card"
+
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-3", className)}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
+
+const CardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn(
+      "text-2xl font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
+
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-sm text-gray-500 dark:text-gray-400", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+
+// File: app/components/ui/charts/CardBarChart.tsx
+
+import React, { useEffect, useRef } from "react";
+import { Chart, ChartConfiguration } from "chart.js/auto";
+
+const CardBarChart = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const config = {
+      type: "bar",
+      data: {
+        labels: [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+        ],
+        datasets: [
+          {
+            label: new Date().getFullYear() - 1,
+            backgroundColor: "#4a5568",
+            borderColor: "#4a5568",
+            data: [30, 78, 56, 34, 100, 45, 13],
+            fill: false,
+            barThickness: 8,
+          },
+          {
+            label: new Date().getFullYear(),
+            fill: false,
+            backgroundColor: "#3182ce",
+            borderColor: "#3182ce",
+            data: [27, 68, 86, 74, 10, 4, 87],
+            barThickness: 8,
+          },
+        ],
+      },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        title: {
+          display: false,
+          text: "Orders Chart",
+        },
+        // Add other options as needed
+      },
+    };
+
+    const ctx = (canvasRef.current as HTMLCanvasElement | null)?.getContext("2d") as CanvasRenderingContext2D;
+    const chart = new Chart(ctx, config as unknown as ChartConfiguration);
+
+    return () => {
+      chart.destroy();
+    };
+  }, []);
+
+  return (
+    <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
+      <div className="rounded-t mb-0 px-4 py-3 bg-transparent">
+        <div className="flex flex-wrap items-center">
+          <div className="relative w-full max-w-full flex-grow flex-1">
+            <h6 className="uppercase text-blueGray-400 mb-1 text-xs font-semibold">
+              Performance
+            </h6>
+            <h2 className="text-blueGray-700 text-xl font-semibold">
+              Total orders
+            </h2>
+          </div>
+        </div>
+      </div>
+      <div className="p-4 flex-auto">
+        <div className="relative h-350-px">
+          <canvas ref={canvasRef} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CardBarChart;
+
+// File: app/components/ui/charts/CardLineChart.tsx
+import React, { useEffect, useRef } from "react";
+import { Chart, ChartConfiguration } from "chart.js/auto";
+
+const CardLineChart = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const config = {
+      type: "line",
+      data: {
+        labels: [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+        ],
+        datasets: [
+          {
+            label: new Date().getFullYear(),
+            backgroundColor: "#ffffff",
+            borderColor: "#ffffff",
+            data: [65, 78, 66, 44, 56, 67, 75],
+            fill: false,
+          },
+          {
+            label: new Date().getFullYear() - 1,
+            fill: false,
+            backgroundColor: "#3182ce",
+            borderColor: "#3182ce",
+            data: [40, 68, 86, 74, 56, 60, 87],
+          },
+        ],
+      },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        // Add other options as needed
+        scales: {
+          x: [
+            {
+              ticks: {
+                fontColor: "#ffffff", // White color for x-axis labels
+              },
+            },
+          ],
+          y: [
+            {
+              ticks: {
+                fontColor: "#ffffff", // White color for y-axis labels
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    const ctx = (canvasRef.current as HTMLCanvasElement | null)?.getContext(
+      "2d"
+    ) as CanvasRenderingContext2D;
+    const chart = new Chart(ctx, config as unknown as ChartConfiguration);
+
+    return () => {
+      chart.destroy();
+    };
+  }, []);
+
+  return (
+    <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded ">
+      <div className="rounded-t mb-0 px-4 py-3 bg-transparent">
+        <div className="flex flex-wrap items-center">
+          <div className="relative w-full max-w-full flex-grow flex-1">
+            <h6 className="uppercase text-white mb-1 text-xs font-semibold">
+              Overview
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div className="p-4 flex-auto">
+        <div className="relative h-350-px">
+          <canvas ref={canvasRef} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CardLineChart;
+
+// File: app/components/ui/charts/PieChart.tsx
+import React, { useEffect, useRef } from "react";
+import { Chart, ChartConfiguration } from "chart.js/auto";
+
+const PieChart = (data:any) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const config = {
+      type: "pie",
+      data: {
+        labels: ["CNHI", "VCE", "MAN", "JCB", "CLASS", "VOLVO"],
+        datasets: [
+          {
+            label: "Dataset 1",
+            data: [12, 19, 3, 2, 3, 5],
+            backgroundColor: [
+              "rgba(255, 99, 132, 0.2)",
+              "rgba(54, 162, 235, 0.2)",
+              "rgba(255, 206, 86, 0.2)",
+              "rgba(75, 192, 192, 0.2)",
+              "rgba(153, 102, 255, 0.2)",
+              "rgba(255, 159, 64, 0.2)",
+            ],
+            borderColor: [
+              "rgba(255, 99, 132, 1)",
+              "rgba(54, 162, 235, 1)",
+              "rgba(255, 206, 86, 1)",
+              "rgba(75, 192, 192, 1)",
+              "rgba(153, 102, 255, 1)",
+              "rgba(255, 159, 64, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        // Add other options as needed
+      },
+    };
+
+    const ctx = (canvasRef.current as HTMLCanvasElement | null)?.getContext(
+      "2d"
+    ) as CanvasRenderingContext2D;
+    const chart = new Chart(ctx, config as unknown as ChartConfiguration);
+
+    return () => {
+      chart.destroy();
+    };
+  }, []);
+
+  return (
+    <div className="w-full flex justify-center">
+      <div className="">
+        <canvas ref={canvasRef} />
+      </div>
+    </div>
+  );
+};
+
+export default PieChart;
+
+// File: app/components/ui/popover.tsx
+import * as React from "react"
+import * as PopoverPrimitive from "@radix-ui/react-popover"
+
+import { cn } from "@/lib/utils"
+
+const Popover = PopoverPrimitive.Root
+
+const PopoverTrigger = PopoverPrimitive.Trigger
+
+const PopoverContent = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+>(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
+  <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Content
+      ref={ref}
+      align={align}
+      sideOffset={sideOffset}
+      className={cn(
+        "z-50 w-72 rounded-md border border-gray-200 bg-white p-4 text-gray-950 shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50",
+        className
+      )}
+      {...props}
+    />
+  </PopoverPrimitive.Portal>
+))
+PopoverContent.displayName = PopoverPrimitive.Content.displayName
+
+export { Popover, PopoverTrigger, PopoverContent }
+
+// File: app/components/ui/select.tsx
+import * as React from "react"
+import * as SelectPrimitive from "@radix-ui/react-select"
+import { Check, ChevronDown, ChevronUp } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+
+const Select = SelectPrimitive.Root
+
+const SelectGroup = SelectPrimitive.Group
+
+const SelectValue = SelectPrimitive.Value
+
+const SelectTrigger = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-gray-800 dark:bg-gray-950 dark:ring-offset-gray-950 dark:placeholder:text-gray-400 dark:focus:ring-gray-300",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <SelectPrimitive.Icon asChild>
+      <ChevronDown className="h-4 w-4 opacity-50" />
+    </SelectPrimitive.Icon>
+  </SelectPrimitive.Trigger>
+))
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
+
+const SelectScrollUpButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollUpButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronUp className="h-4 w-4" />
+  </SelectPrimitive.ScrollUpButton>
+))
+SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
+
+const SelectScrollDownButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollDownButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronDown className="h-4 w-4" />
+  </SelectPrimitive.ScrollDownButton>
+))
+SelectScrollDownButton.displayName =
+  SelectPrimitive.ScrollDownButton.displayName
+
+const SelectContent = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = "popper", ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 bg-white text-gray-950 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50",
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        className
+      )}
+      position={position}
+      {...props}
+    >
+      <SelectScrollUpButton />
+      <SelectPrimitive.Viewport
+        className={cn(
+          "p-1",
+          position === "popper" &&
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+        )}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
+      <SelectScrollDownButton />
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+))
+SelectContent.displayName = SelectPrimitive.Content.displayName
+
+const SelectLabel = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Label
+    ref={ref}
+    className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)}
+    {...props}
+  />
+))
+SelectLabel.displayName = SelectPrimitive.Label.displayName
+
+const SelectItem = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-800 dark:focus:text-gray-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <SelectPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </SelectPrimitive.ItemIndicator>
+    </span>
+
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectPrimitive.Item>
+))
+SelectItem.displayName = SelectPrimitive.Item.displayName
+
+const SelectSeparator = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-gray-100 dark:bg-gray-800", className)}
+    {...props}
+  />
+))
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName
+
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+}
+
+// File: app/data/Absencies.ts
+export   const absenciese = [
+  {
+    data: "2021-10-10",
+    time: "08:00 - 17:00",
+    reason: "Sick Leave",
+    status: "Pending",
+  },
+  {
+    data: "2021-10-10",
+    time: "08:00 - 17:00",
+    reason: "Sick Leave",
+    status: "Pending",
+  },
+  {
+    data: "2021-10-10",
+    time: "08:00 - 17:00",
+    reason: "Sick Leave",
+    status: "Approved",
+  },
+];
+// File: app/data/Dataemployee.ts
+import pic from "@/Images/profile.jpg";
+
+export const dataemployee = [
+  {
+    Name: "John Doe",
+    Email: "John.Doe@Leoni.com",
+    Phone: "+1 234-567-8900",
+    Address: "1234 Elm Street, Springfield, IL 62701",
+    Id: "2245882",
+    Department: "Engineering",
+    pic: pic,
+  },
+  {
+    Name: "Jane Doe",
+    Email: "Jane.Doe@Leoni.com",
+    Phone: "+1 234-567-8900",
+    Address: "1234 Elm Street, Springfield, IL 62701",
+    Id: "2245382",
+    Department: "HR Management",
+    pic: pic,
+  },
+];
+
+// File: app/globals.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 224, 227, 233;
+  --background-start-rgb: 224, 227, 233;
+  --background-end-rgb: 224, 227, 233;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 23 37 84 ;
+    --background-start-rgb: 224, 227, 233;
+    --background-end-rgb: 224, 227, 233;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+@layer base {
+  .font-outline-2 {
+    -webkit-text-stroke: 1px rgb(255, 255, 255);
+  }
+  .font-outline-4 {
+    -webkit-text-stroke: 4px black;
+  }
+}
+// File: app/layout.tsx
+import "./globals.css";
+import Layout from "@/components/component/Layout";
+
+
+
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+
+  return (
+    <html lang="en">
+      <body className=" overflow-y-scroll no-scrollbar ">
+        <main className="">
+          <Layout active="Home">{children}</Layout>
+        </main>
+      </body>
+    </html>
+  );
+}
+
+
+
+
+// File: app/page.tsx
+"use client";
+import Layout from "@/components/component/Layout";
+
+import {
+  CardTitle,
+  CardDescription,
+  CardHeader,
+  CardContent,
+  Card,
+} from "@/components/ui/card";
+import PieChart from "@/components/ui/charts/PieChart";
+
+// import { ResponsiveBar } from "@nivo/bar";
+// import { ResponsiveLine } from "@nivo/line";
+
+import CardBarChat from "@/components/ui/charts/CardBarChart";
+import CardLineChart from "@/components/ui/charts/CardLineChart";
+export default function Home() {
+  const data = [
+    { name: "CNHI", value: 400 },
+    { name: "C1", value: 300 },
+    { name: "Volvo", value: 300 },
+    { name: "C3", value: 200 },
+  ];
+  return (
+    <main>
+        <div>
+          <Card className="mb-4">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">
+                Employee Satisfaction
+              </CardTitle>
+              <SmileIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">85%</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                +74% from last month
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                The employee satisfaction score has increased by 74% compared to
+                the previous month.
+              </p>
+              <CardBarChat />
+            </CardContent>
+          </Card>
+          <Card className="mb-4">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">
+                Team Productivity
+              </CardTitle>
+              <ClockIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">92%</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Meeting deadlines
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                The team productivity rate is at 92%, ensuring timely completion
+                of tasks.
+              </p>
+              <CardLineChart />
+            </CardContent>
+          </Card>
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium">
+                  Sales Performance
+                </CardTitle>
+                <DollarSignIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">$250K</div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Quarterly revenue
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  The sales performance has reached $250K this quarter,
+                  exceeding expectations.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium">
+                  Customer Feedback
+                </CardTitle>
+                <MessageCircleIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">4.8</div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Average rating
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Customers have rated our services at 4.8, reflecting high
+                  satisfaction levels.
+                </p>
+                <PieChart data={data} />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+    </main>
+  );
+}
+
+function ClockIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+function DollarSignIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="12" x2="12" y1="2" y2="22" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+
+function MessageCircleIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" />
+    </svg>
+  );
+}
+
+function SmileIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <line x1="9" x2="9.01" y1="9" y2="9" />
+      <line x1="15" x2="15.01" y1="9" y2="9" />
+    </svg>
+  );
+}
+
+// File: app/styles/Signin.module.css
+.wrapper {
+  display: flex;
+  align-items: center;
+  transform: rotate(11deg) translate(-20%, -10%);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 70%;
+  height: 150%;
+  background-color: #002140;
+  z-index: 2;
+}
+
+.content {
+  position: relative;
+  display: flex;
+  padding: 30px;
+  width: 100%;
+  height: calc(100vh - 64px);
+  align-items: center;
+  font-weight: bold;
+  text-align: center;
+  z-index: 2;
+}
+
+.cardWrapper {
+  display: flex;
+  width: 400px;
+  flex-direction: column;
+  align-items: center;
+  justify-items: center;
+  margin-left: 15%;
+  font-size: 1.2rem;
+  z-index: 3;
+}
+
+.cardContent {
+  width: 100%;
+  background: white;
+  border-radius: 4px;
+  padding: 16px;
+  margin: 16px;
+}
+
+.cardContent input {
+  margin: 16px 0;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  padding: 4px 11px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 16px;
+  line-height: 1.8715;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.cardContent input:nth-child(n + 1) {
+  margin-top: 0px;
+}
+
+.cardContent hr {
+  margin: 16px 0;
+}
+
+.cardContent button {
+  line-height: 1.5715;
+  position: relative;
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 2%);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  touch-action: manipulation;
+  height: 42px;
+  padding: 4px 15px;
+  font-size: 16px;
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.65);
+  background: #fff;
+  border-color: #d9d9d9;
+  width: 100%;
+}
+
+button.primaryBtn {
+  color: #fff;
+  background: #002140;
+  border-color: #002140;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 12%);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+}
+
+.styledPattern {
+  position: absolute;
+  object-fit: cover;
+  min-width: 100%;
+  min-height: 100%;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+@media (max-width: 1024px) {
+  .wrapper {
+    left: -50px; 
+    width: 80%;
+  }
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    width: 200%;
+  }
+  .styledPattern {
+    display: none !important;
+  }
+  .content {
+    justify-content: center;
+  }
+  .cardWrapper {
+    margin-left: 0px;
+  }
+}
+// File: app/styles/pagination.css
+.pagination {
+  justify-content: center;
+  display: flex;
+  padding-left: 0;
+  list-style: none;
+  margin: 0;
+}
+
+.page-item .page-link {
+  position: relative;
+  display: block;
+  font-weight: 500;
+  margin: 10px 2px;
+  min-height: 40px;
+  min-width: 40px;
+  border-radius: 8px;
+  text-align: center;
+  line-height: 40px;
+  color: rgb(23 37 84);
+  text-decoration: none;
+}
+
+.page-item a.page-link:hover {
+  background-color: #c9c9c9;
+}
+
+.page-item.active .page-link {
+  font-weight: 900;
+  color: #ffffff;
+  background-color: rgb(23 37 84);
+}
+
+.page-item.disabled .page-link {
+  color: #848586;
+  pointer-events: none;
+  cursor: auto;
+}

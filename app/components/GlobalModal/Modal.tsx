@@ -1,15 +1,16 @@
 import { classNames } from "@/package/utils";
 import { Dialog, Transition } from "@headlessui/react";
-import { Info, XIcon } from "lucide-react";
+import { DeleteIcon, Info, TrashIcon, XIcon } from "lucide-react";
 // import {
 //   ExclamationIcon,
 //   InformationCircleIcon,
 //   XIcon,
 // } from "@heroicons/react/outline";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { FaExclamation } from "react-icons/fa";
 
 export interface AlertProps {
+  delete?: boolean;
   isOpen: boolean;
   setIsOpen?: React.Dispatch<React.SetStateAction<boolean>> | undefined;
   type: "error" | "success" | "warning" | "info";
@@ -26,7 +27,8 @@ export interface AlertProps {
   children?: React.ReactNode;
 }
 
-export default function Wallettype({
+export default function Modal({
+  delete: _delete,
   isOpen,
   setIsOpen,
   type,
@@ -42,6 +44,7 @@ export default function Wallettype({
   isLoading = false,
   children,
 }: AlertProps) {
+  const [typo, setType] = useState(type);
   return (
     // <section className="absolute inset-0 flex items-center justify-center bg-ft-lt/70">
     <Transition.Root show={isOpen} as={Fragment}>
@@ -74,6 +77,9 @@ export default function Wallettype({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-x-auto rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <div className="absolute top-4 text-gray-400 right-16 hover:text-red-600 hover:cursor-pointer h-1 w-1" onMouseEnter={()=>{setType("error")}} onMouseLeave={()=>{setType(type)}} >
+                  <TrashIcon />
+                </div>
                 <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
                   <button
                     type="button"
@@ -94,25 +100,22 @@ export default function Wallettype({
                   <div
                     className={classNames(
                       "mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10",
-                      type === "error"
+                      typo === "error"
                         ? "bg-red-100"
-                        : type === "success"
+                        : typo === "success"
                         ? "bg-green-100"
-                        : type === "warning"
+                        : typo === "warning"
                         ? "bg-yellow-100"
                         : "bg-black/20"
                     )}
                   >
-                    {type === "error" ? (
+                    {typo === "error" ? (
                       <FaExclamation
                         className="h-6 w-6 text-red-600"
                         aria-hidden="true"
                       />
                     ) : (
-                      <Info
-                        className="h-6 w-6 text-black"
-                        aria-hidden="true"
-                      />
+                      <Info className="h-6 w-6 text-black" aria-hidden="true" />
                     )}
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-5/6">
@@ -140,11 +143,11 @@ export default function Wallettype({
                       "min-w-[90px] inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed",
                       isLoading
                         ? "bg-ft-ts/70"
-                        : type === "error"
+                        : typo === "error"
                         ? "bg-red-600"
-                        : type === "success"
+                        : typo === "success"
                         ? "bg-green-600"
-                        : type === "warning"
+                        : typo === "warning"
                         ? "bg-yellow-600"
                         : "bg-black"
                     )}

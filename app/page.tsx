@@ -1,4 +1,4 @@
-"use client";
+
 import Layout from "@/components/component/Layout";
 
 import {
@@ -24,7 +24,7 @@ export default function Home() {
   ];
   return (
     <main>
-        <div>
+        {/* <div>
           <Card className="mb-4">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium">
@@ -102,7 +102,7 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </div> */}
     </main>
   );
 }

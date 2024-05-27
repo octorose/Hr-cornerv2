@@ -1,9 +1,9 @@
 // "use server";
 import connect from "@/package/MongoDb/db";
 import { NextRequest, NextResponse } from "next/server";
-import Candidats from '../../../Models/Candidats';
-import { NextApiRequest, NextApiResponse } from "next"; 
-import {CandidatIdGenerator} from "@/package/functions/PendingCandidatIdGenerator";
+import Candidats from "../../../Models/Candidats";
+import { NextApiRequest, NextApiResponse } from "next";
+import { CandidatIdGenerator } from "@/package/functions/PendingCandidatIdGenerator";
 import { streamToString } from "@/package/functions/StreamtoString";
 async function GET(req: NextApiRequest) {
   try {
@@ -22,7 +22,6 @@ async function GET(req: NextApiRequest) {
       }
     }
 
-    
     return NextResponse.json({
       data: CandidatsData,
       count: CandidatsCount,
@@ -38,9 +37,14 @@ async function POST(req: NextApiRequest, res: NextApiResponse) {
     await connect();
     const data = await streamToString(req.body);
     const dataObj = JSON.parse(data);
-    for (const key in dataObj) {    
-      if (dataObj[key] === "" || dataObj[key] === null || dataObj[key] === undefined || dataObj[key] === 0) {
-        if (key === "ID") {          
+    for (const key in dataObj) {
+      if (
+        dataObj[key] === "" ||
+        dataObj[key] === null ||
+        dataObj[key] === undefined ||
+        dataObj[key] === 0
+      ) {
+        if (key === "ID") {
           dataObj[key] = null;
           continue;
         }
@@ -49,10 +53,22 @@ async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
     const candidat = new Candidats(dataObj);
     await candidat.save();
-    return NextResponse.json({  message: "Candidat Created"});
+    return NextResponse.json({ message: "Candidat Created" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-export { GET, POST };
+async function DELETE(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    await connect();
+    const urlSearchParams = new URLSearchParams(req.url?.split("?")[1]);
+    const id = urlSearchParams.get("id");
+    await Candidats.findByIdAndDelete(id);
+    return NextResponse.json({ message: "Candidat Deleted" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export { GET, POST, DELETE };

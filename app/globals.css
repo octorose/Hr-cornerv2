@@ -3,27 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 170, 140, 125;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 224, 227, 233;
+  --background-start-rgb: 224, 227, 233;
+  --background-end-rgb: 224, 227, 233;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 10, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --foreground-rgb: 23 37 84 ;
+    --background-start-rgb: 224, 227, 233;
+    --background-end-rgb: 224, 227, 233;
   }
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
 }
 
 @layer utilities {
@@ -33,7 +27,7 @@ body {
 }
 @layer base {
   .font-outline-2 {
-    -webkit-text-stroke: 3px rgb(15, 31, 66);
+    -webkit-text-stroke: 1px rgb(255, 255, 255);
   }
   .font-outline-4 {
     -webkit-text-stroke: 4px black;

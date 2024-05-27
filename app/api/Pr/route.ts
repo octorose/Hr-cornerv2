@@ -10,9 +10,12 @@ async function GET(req: NextRequest) {
     console.log("GET Request");
     
     await connect();
-    const prData = await pr.find({}); 
+     const urlSearchParams = new URLSearchParams(req.url?.split("?")[1]);
+     const page = urlSearchParams.get("page");
+    const prData = await pr.find({}).skip((parseInt(page as string) - 1) * 9).limit(9);
     const prIds = prData.map((item:any) => item["_doc"].Pr_Id);
     const bypr = await CandidaturesByPr();
+    const PrCount = await pr.countDocuments({});
     //add bypr to prData
     prData.forEach((item:any) => {
       item["_doc"].totalCandidates = bypr?.find((x:any) => x.Pr_ID === item["_doc"].Pr_Id)?.totalCandidature;
@@ -22,6 +25,7 @@ async function GET(req: NextRequest) {
     return NextResponse.json({
       data: prIds,
       data2: prData,
+      count: PrCount,
       message: "Got Pr_Ids Here",
     });
   } catch (error: any) {

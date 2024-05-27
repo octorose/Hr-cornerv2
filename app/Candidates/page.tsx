@@ -3,20 +3,19 @@
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 
 import Select from "@mui/material/Select";
 import CustomTable from "@/components/CustomTable/CustomTable";
 import { useState } from "react";
 
-
 import useSWR from "swr";
 import { Plus } from "lucide-react";
 import GlobalButton from "@/components/GlobalButton/globalButton";
 import useAlert from "@/Hooks/useAlert";
-import Wallettype from "@/components/GlobalModal/Wallettype";
+import Modal from "@/components/GlobalModal/Modal";
 
-const Candidate = ({searchParams}:any) => {
+const Candidate = ({ searchParams }: any) => {
   const { alert, setAlert } = useAlert();
 
   const [formstep, setFormStep] = useState(1);
@@ -43,7 +42,7 @@ const Candidate = ({searchParams}:any) => {
     AcceptedE3: string;
   }
   const [formdata, setFormdata] = useState<Candidate>({
-    ID:null,
+    ID: null,
     Nom: "",
     Prenom: "",
     Date_naissance: "",
@@ -64,79 +63,47 @@ const Candidate = ({searchParams}:any) => {
     AcceptedE3: "",
   });
 
-  const {data:Candidates, error} = useSWR("/api/Candidates", async (url: any) => {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
+  const { data: Candidates, error } = useSWR(
+    "/api/Candidates",
+    async (url: any) => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      return data;
     }
-    const data = await response.json();
-    console.log(data);
-    
-    return data;
-  
-  }
   );
 
-  const {data:Prs, error:rolesError} = useSWR("/api/Pr", async (url: any) => {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
+  const { data: Prs, error: rolesError } = useSWR(
+    "/api/Pr",
+    async (url: any) => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      return data;
     }
-    const data = await response.json();
-    console.log(data);
-    
-    return data;
-  
-  }
   );
-      const handleSearch = (e: any) => {
-      const search = e.target.value;
-      if (search === "") {
-        setCandidate(undefined);
-      }
-      const filtered = Object.values(Candidates).filter((item: any) => {
-        return item.Nom === search;
-      });
-
-      if (filtered.length > 0) {
-        setCandidate(filtered[0] as Candidate);
-        console.log(filtered[0] as Candidate);
-        
-      }
-    };
-  const SearchaCandidate = () => {
-    const search = Candidates?.filter((item:any) => item.Nom === searchParams);
-    if (search !== undefined) {
-      setCandidate(search[0]);
-    }
-  }
-
 
   const isValidPr = (value: string) => {
-        const inputElement = document.getElementById("prInput"); 
+    const inputElement = document.getElementById("prInput");
 
     if (Prs.data.includes(Number(value))) {
-      console.log("Valid PR");
-      if(inputElement !== null){
-        inputElement.style.borderColor = "green"
+      if (inputElement !== null) {
+        inputElement.style.borderColor = "green";
         return true;
       }
     } else {
       Toast.fire({
-        icon:'warning',
-        title:'Invalid PR Id'
-      })
-      console.log("Invalid PR");
+        icon: "warning",
+        title: "Invalid PR Id",
+      });
       return false;
     }
   };
-  const [Candidate, setCandidate] = useState<Candidate>();
-  // const handleSearch = (e: any) => {
-  //   const search = data?.filter((item) => item.Nom === e);
-  //   if (search !== undefined) {
-  //     setCandidate(search[0]);
-  //   }
-  // };
+
   const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -151,79 +118,10 @@ const Candidate = ({searchParams}:any) => {
   const headres = ["Date", "Time", "Reason", "Status"];
   return (
     <main>
-      {/* {Candidate ? (
-        <div>
-          <DashHeader
-            handleSearch={() => {
-              console.log("test");
-            }}
-            Candidate={Candidate}
-          />
-          <div className="grid gap-6 mt-4">
-            <Card>
-              <CardHeader className="flex items-center gap-4">
-                <div className="flex flex-col justify-center text-center">
-                  <CardTitle className="text-base font-semibold">
-                    {Candidate?.Name}
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    {Candidate?.Department}
-                  </CardDescription>
-                </div>
-                <Button className="ml-auto" size="sm" variant="outline">
-                  Edit Profile
-                </Button>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                {Candidate && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-sm font-semibold">Candidate ID</h3>
-                      <p className="text-sm">{Candidate.Id}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold">Email</h3>
-                      <p className="text-sm">{Candidate.Email}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold">Phone</h3>
-                      <p className="text-sm">{Candidate.Phone}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold">Address</h3>
-                      <p className="text-sm">{Candidate.Addresse}</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            <div className="flex w-full justify-centre gap-6">
-              <Card className="w-1/2">
-                <CardHeader>
-                  <CardTitle>Performance</CardTitle>
-                  <CardDescription>Performance over time</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CardLineChart />
-                </CardContent>
-              </Card>
-              <Card className="w-1/2">
-                <CardHeader>
-                  <CardTitle>Absenteeism</CardTitle>
-                  <CardDescription>Candidate Abcentisme</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CustomTable headres={headres} data2={absenciese} />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      ) : ( */}
       <div className="">
-        <div className="flex flex-col  mt-10 h-1/2">
+        <div className="flex flex-col  mt-2 h-1/2">
           <div className="">
-            <div className="flex  flex-row  gap-4 mt-4">
+            <div className="flex  flex-row  gap-4 ">
               <CustomTable
                 headres={[
                   "Nom",
@@ -260,13 +158,13 @@ const Candidate = ({searchParams}:any) => {
               };
             })
           }
-          className="bg-[#045dbb] w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
+          className="bg-blue-950 w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
           aria-label="add"
         >
           <Plus />
         </GlobalButton>
       </div>
-      <Wallettype
+      <Modal
         isOpen={alert.isOpen}
         onSubmit={async () => {
           if (formstep === 1) {
@@ -274,7 +172,6 @@ const Candidate = ({searchParams}:any) => {
             return;
           } else {
             setAlert((prev) => ({ ...prev, isLoading: true }));
-            console.log(formdata);
             await fetch("/api/Candidates", {
               method: "POST",
               body: JSON.stringify(formdata),
@@ -433,7 +330,7 @@ const Candidate = ({searchParams}:any) => {
             />
           </div>
         )}
-      </Wallettype>
+      </Modal>
     </main>
   );
 };

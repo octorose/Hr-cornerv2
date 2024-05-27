@@ -10,12 +10,13 @@ interface LayoutProps {
 }
 
 function Layout({ children, active }: LayoutProps) {
+  
   return (
-    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
+    <div className="grid  w-full lg:grid-cols-[280px_1fr]">
       <SideBar  active={active} />
       <div className="flex flex-col">
         <Nav />
-        <main className="flex flex-1 flex-col gap-4 p-2 md:gap-8 md:p-6 dark:bg-gray-800/60">
+        <main className="flex flex-1 bg-white flex-col gap-4 p-2 md:gap-8 md:p-6 ">
           {children}
         </main>
       </div>

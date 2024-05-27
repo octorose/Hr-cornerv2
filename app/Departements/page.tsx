@@ -5,7 +5,7 @@ import Card from "@/components/Card/Card";
 import "@/styles/pagination.css";
 import Loader from "@/components/Loaders/Loader";
 import ResponsivePagination from "react-responsive-pagination";
-import Wallettype from "@/components/GlobalModal/Wallettype";
+import Modal from "@/components/GlobalModal/Modal";
 import GlobalButton from "@/components/GlobalButton/globalButton";
 import { Plus } from "lucide-react";
 
@@ -129,7 +129,7 @@ function page() {
             // @ts-ignore
             data2.data?.length > 0 ? (
               <div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 w-[70%] mt-10 mx-auto">
+                <div className="grid grid-cols-1 mb-5 gap-5 md:grid-cols-2 lg:grid-cols-3 w-[70%] mt-5 mx-auto">
                   {data2 &&
                     // @ts-ignore
                     data2?.data?.map((item: any) => (
@@ -179,13 +179,13 @@ function page() {
               };
             })
           }
-          className="bg-[#045dbb] w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
+          className="bg-blue-950 w-14 h-14 rounded-full flex items-center justify-center shadow-xl text-white mr-10"
           aria-label="add"
         >
           <Plus />
         </GlobalButton>
       </div>
-      <Wallettype
+      <Modal
         isOpen={alert.isOpen}
         onSubmit={() => {
           UpdateDepartement(departementToEdit);
@@ -237,8 +237,8 @@ function page() {
             }
           />
         </div>
-      </Wallettype>
-      <Wallettype
+      </Modal>
+      <Modal
         isOpen={alert2.isOpen}
         onSubmit={() => {
           AddDepartement(departementToEdit);
@@ -306,7 +306,7 @@ function page() {
             }
           />
         </div>
-      </Wallettype>
+      </Modal>
     </div>
   );
 }

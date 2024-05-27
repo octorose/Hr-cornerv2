@@ -5,14 +5,15 @@ import PrCard from "@/components/Card/PrCard";
 import "@/styles/pagination.css";
 import Loader from "@/components/Loaders/Loader";
 import ResponsivePagination from "react-responsive-pagination";
-import Wallettype from "@/components/GlobalModal/Wallettype";
+import Modal from "@/components/GlobalModal/Modal";
 import GlobalButton from "@/components/GlobalButton/globalButton";
 import { Plus } from "lucide-react";
-
+import Swal from "sweetalert2";
 import useAlert from "@/Hooks/useAlert";
 function page() {
   interface Pr {
     Nom: string;
+    Pr_Id:number | null;
     totalCandidates: number;
     Description: string;
     manager: string;
@@ -33,6 +34,8 @@ function page() {
         throw new Error("Failed to fetch data");
       }
       const data = await response.json();
+      console.log(data);
+
       setData(data);
       setisLoading(false);
     } catch (error) {
@@ -40,6 +43,7 @@ function page() {
     }
     return data2;
   };
+
   const AddPr = async (Pr: any) => {
     try {
       const response = await fetch(`/api/Pr`, {
@@ -53,10 +57,10 @@ function page() {
         throw new Error("Failed to add Pr");
       }
       const data = await response.json();
-      console.log(data);
       setAlert2((prev) => ({ ...prev, isOpen: false }));
       setPrToEdit({
         Nom: "",
+        Pr_Id:null,
         totalCandidates: 0,
         Description: "",
         manager: "",
@@ -67,27 +71,34 @@ function page() {
       console.error(error);
     }
   };
-  const filterPrsByName = async (searchquery: string) => {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    iconColor: "red",
+    customClass: {
+      popup: "colored-toast",
+    },
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true,
+  });
+  const filterPrsByDepartment = async (department: string) => {
     try {
-      setisLoading(true);
-      const response = await fetch(`/api/Pr/All`);
+      const response = await fetch(
+        `/api/Pr/Departement?departement=${department}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
       const data = await response.json();
-      const filteredData = {
-        data: data.data.filter((item: any) =>
-          item.Nom.toLowerCase().includes(searchquery.toLowerCase())
-        ),
-      };
+      console.log(data);
 
-      // @ts-ignore
-      setData(filteredData);
-      setisLoading(false);
+      setData(data);
     } catch (error) {
       console.error(error);
     }
   };
+
   const perpage = 10;
   const totalPages = Math.ceil((data2 as any)?.count / perpage);
   const UpdatePr = async (Pr: any) => {
@@ -121,7 +132,7 @@ function page() {
         {!isLoading ? (
           <div>
             <DashHeader
-              handleSearch={filterPrsByName}
+              handleSearch={filterPrsByDepartment}
               employee={[]}
               Topic="Pr"
             />
@@ -129,13 +140,15 @@ function page() {
             // @ts-ignore
             data2.data2?.length > 0 ? (
               <div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 w-[70%] mt-10 mx-auto">
+                <div className="grid grid-cols-1 mb-5 gap-5 md:grid-cols-2 lg:grid-cols-3 w-[70%] mt-5 mx-auto">
                   {data2 &&
                     // @ts-ignore
                     data2?.data2?.map((item: any) => (
                       <PrCard
                         Pr={item}
                         onClick={() => {
+                          console.log(item);
+
                           setPrToEdit(item);
                           setAlert((prev) => ({ ...prev, isOpen: true }));
                         }}
@@ -145,7 +158,7 @@ function page() {
                 <ResponsivePagination
                   current={currentPage}
                   total={totalPages}
-                  onPageChange={(newpage) => setCurrentPage(newpage)}
+                  onPageChange={(page) => setCurrentPage(page)}
                 />
               </div>
             ) : (
@@ -185,7 +198,7 @@ function page() {
           <Plus />
         </GlobalButton>
       </div>
-      <Wallettype
+      <Modal
         isOpen={alert.isOpen}
         onSubmit={() => {
           UpdatePr(PrToEdit);
@@ -195,10 +208,8 @@ function page() {
         onCancel={() => {
           setAlert((prev) => ({ ...prev, isOpen: false }));
         }}
-        alertTitle={
-          "Edit " + PrToEdit?.Nom + " Details" ||
-          "Pr" + "Details"
-        }
+        //@ts-ignore
+        alertTitle={"Edit " + PrToEdit?.Pr_Id + " Details" || "Pr" + "Details"}
         alertDescription={"Edit "}
         submitBtnName={"Edit"}
         cancelBtnName="Cancel"
@@ -214,7 +225,7 @@ function page() {
             type="text"
             id="Nom"
             name="Nom"
-            value={PrToEdit?.Nom}
+            value={PrToEdit?.Pr_Id === null ? "" : PrToEdit?.Pr_Id}
             onChange={(e) =>
               setPrToEdit((prev: any) => ({
                 ...prev,
@@ -237,8 +248,8 @@ function page() {
             }
           />
         </div>
-      </Wallettype>
-      <Wallettype
+      </Modal>
+      <Modal
         isOpen={alert2.isOpen}
         onSubmit={() => {
           AddPr(PrToEdit);
@@ -306,7 +317,7 @@ function page() {
             }
           />
         </div>
-      </Wallettype>
+      </Modal>
     </div>
   );
 }

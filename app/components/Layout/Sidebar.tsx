@@ -11,10 +11,11 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import logo from "@/Images/LeoniLogo.png";
+import { useRouter } from "next/router";
 
 // Postion Request icon an inline PR icon
 const PositioRequestIcon = () => (
@@ -35,7 +36,22 @@ const PositioRequestIcon = () => (
 );
 
 const Sidebar = ({ active }: { active: string }) => {
-  const [ActiveButton, setActiveButton] = React.useState(active);
+  // const router = useRouter();
+  const [activeButton, setActiveButton] = React.useState(active);
+
+  useEffect(() => {
+    // Check if there's a stored active button in localStorage
+    const storedActiveButton = localStorage.getItem("activeButton");
+    if (storedActiveButton) {
+      setActiveButton(storedActiveButton);
+    }
+  }, []);
+
+  const handleSetActiveButton = (name: string) => {
+    setActiveButton(name);
+    // Store the active button in localStorage
+    localStorage.setItem("activeButton", name);
+  };
   const route = [
     { name: "Home", path: "/", icon: <HomeIcon className="h-4 w-4" /> },
     {
@@ -56,41 +72,48 @@ const Sidebar = ({ active }: { active: string }) => {
   ];
 
   return (
-    <div className="">
-      <div className="hidden border-r  bg-gray-100/40 lg:block dark:bg-gray-800/40 h-full">
-        <div className="flex h-full max-h-screen w-[280px]  flex-col gap-2 fixed ">
-          <div className="flex h-20 items-center  border-b px-6">
-            <Link className="flex items-center  font-semibold" href="#">
-              <Image src={logo} width={0} height={20} alt="logo" />
-              <span className="ml-1">'s Hr Corner</span>
+    <div className="my-[6%] ml-[5%] hidden lg:inline-block">
+        <div className="flex bg-blue-950 rounded-3xl max-h-screen h-[96%] w-[280px]  flex-col gap-2 fixed ">
+          <div className="flex justify-center h-20 items-center  border-b px-6">
+            <Link className="flex  items-center  font-semibold" href="#">
+              <div className="flex  ml-auto items-center gap-1">
+                <div className="flex ml-auto font-extrabold font-outline-2 text-blue-950 text-3xl items-center gap-4">
+                  LEONI
+                </div>
+                <div className="flex ml-auto items-center bg-orange-500 text-white rounded-lg px-1 py-2 gap-4">
+                  ' S CORNER
+                </div>
+              </div>
             </Link>
-            <Button className="ml-auto h-8 w-8" size="icon" variant="outline">
-              <BellIcon className="h-4 w-4" />
-              <span className="sr-only">Toggle notifications</span>
-            </Button>
           </div>
-          <div className="flex-1 overflow-auto py-2">
-            <nav className="grid items-start px-4 text-sm font-medium">
+          <div className="flex-1  py-2">
+            <nav className="grid  px-5 text-sm text-white gap-2 font-medium">
               {route.map((item, index) => (
                 <Link
                   href={item.path}
                   // href="#"
                   key={index}
-                  className={`flex items-center gap-2 p-3 rounded-lg ${
-                    ActiveButton === item.name
-                      ? "bg-gray-200 dark:bg-gray-700"
+                  className={`flex items-center transition-all gap-2 p-3 rounded-lg hover:bg-gray-100 hover:bg-opacity-20 ${
+                    activeButton === item.name
+                      ? "bg-gray-200 dark:bg-gray-200  text-lg text-orange-500 hover:bg-gray-200 hover:bg-opacity-100"
                       : ""
                   }`}
-                  onClick={() => setActiveButton(item.name)}
+                  onClick={() => handleSetActiveButton(item.name)}
                 >
                   {item.icon}
-                  <span>{item.name}</span>
+                  <span
+                    className={`${
+                      activeButton === item.name ? "translate-x-3" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </span>
                 </Link>
               ))}
             </nav>
           </div>
         </div>
-      </div>
+
     </div>
   );
 };
