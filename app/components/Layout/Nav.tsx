@@ -15,7 +15,7 @@ import DropdownMenu from "../DropDown/DropDown";
 import { getServerSession } from "next-auth";
 import { options } from "@/api/auth/[...nextauth]/options";
 
-async function Nav() {
+async function Nav({title,greeting}: {title?: string,greeting:string}) {
   const session = await getServerSession(options);
 
   return (
@@ -26,18 +26,30 @@ async function Nav() {
       </Link>
 
       <nav className="hidden md:flex md:ml-auto md:items-center md:gap-5 lg:gap-4">
-        <Link className="font-semibold text-white" href="#">
-          Employees
-        </Link>
-        <Link className="text-orange-500" href="#">
-          Recruitement
-        </Link>
-        <Link className="text-orange-500" href="#">
-          Performance
-        </Link>
-        <Link className="text-orange-500" href="#">
-          Rewards
-        </Link>
+        {title ? (
+          <>
+{/* <div className="flex  gap-2 items-center justify-between bg-black"> */}
+    <p className="text-orange-500 font-extrabold text-4xl">{greeting}</p>
+  
+
+    </>
+
+        ) : (
+          <>
+            <Link className="font-semibold text-white" href="#">
+              Employees
+            </Link>
+            <Link className="text-orange-500" href="#">
+              Recruitement
+            </Link>
+            <Link className="text-orange-500" href="#">
+              Performance
+            </Link>
+            <Link className="text-orange-500" href="#">
+              Rewards
+            </Link>
+          </>
+        )}
       </nav>
       <div className="flex ml-auto text-white items-center gap-4">
         {session ? (

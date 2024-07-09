@@ -41,12 +41,11 @@
     }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "declarations.d.ts",
-    ".next/types/**/*.ts"
-  ],
+      "next-env.d.ts",
+      "**/*.tsx",
+      "declarations.d.ts",
+      ".next/types/**/*.ts"
+    ],
   "exclude": [
     "node_modules"
   ]

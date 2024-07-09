@@ -15,6 +15,7 @@ async function GET(req: NextApiRequest) {
       .skip((parseInt(page as string) - 1) * 10)
       .limit(10);
     const CandidatsCount = await Candidats.countDocuments({});
+    // 6000
     //replace Candidats.ID = null to ""
     for (const candidat of CandidatsData) {
       if (candidat.ID === null) {
